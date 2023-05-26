@@ -82,4 +82,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasOne(Helper::class);
     }
+
+    public function helpSeeker()
+    {
+        return $this->hasOne(HelpSeeker::class);
+    }
 }
