@@ -38,5 +38,17 @@ class UsersSeeder extends Seeder
             'email' => 'mrouhani@gmail.com',
             'password' => Hash::make('13791379'),
         ]);
+
+        User::create([
+            'username' => 'arghavanff',
+            'first_name' => 'Arghavan',
+            'last_name' => 'Falakfarsa',
+            'national_code' => '0023227054',
+            'phone_number' => '09366223098',
+            'address' => 'West Azerbaijan, Urmia',
+            'role' => 'helper',
+            'email' => 'arghavanff@gmail.com',
+            'password' => Hash::make('13791379'),
+        ]);
     }
 }
