@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Organization extends Model
+class Package extends Model
 {
     use HasFactory;
 
@@ -15,14 +15,18 @@ class Organization extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
-        'phone_number',
+        'title',
+        'quantity',
         'description',
-        'address',
     ];
 
-    public function packages()
+    public function organization()
     {
-        return $this->hasMany(Package::class, 'organization_id');
+        return $this->belongsTo(Organization::class, 'organization_id');
+    }
+
+    public function items()
+    {
+        return $this->hasMany(PackageItem::class, 'package_id');
     }
 }

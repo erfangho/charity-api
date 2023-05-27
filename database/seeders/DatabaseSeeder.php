@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
             ProductCategoriesSeeder::class,
             ProductsSeeder::class,
             PeopleAidsSeeder::class,
+            PackagesSeeder::class,
+            PackageItemsSeeder::class,
         ]);
     }
 }

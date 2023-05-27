@@ -2,22 +2,21 @@
 
 namespace Database\Seeders;
 
-use App\Models\PeopleAid;
+use App\Models\PackageItem;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class PeopleAidsSeeder extends Seeder
+class PackageItemsSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        PeopleAid::create([
-            'title' => 'کاپشن',
-            'product_id' => '1',
-            'helper_id' => '1',
-            'quantity' => 30,
+        PackageItem::create([
+            'product_id' => '2',
+            'package_id' => '1',
+            'quantity' => 6,
         ]);
     }
 }
