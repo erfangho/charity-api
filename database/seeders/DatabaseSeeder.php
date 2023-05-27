@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             HelpSeekersSeeder::class,
             ProductCategoriesSeeder::class,
             ProductsSeeder::class,
+            PeopleAidsSeeder::class,
         ]);
     }
 }

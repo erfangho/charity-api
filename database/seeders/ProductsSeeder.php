@@ -16,13 +16,13 @@ class ProductsSeeder extends Seeder
         Product::create([
             'name' => 'کاپشن',
             'category_id' => '1',
-            'quantity' => '30',
+            'quantity' => 30,
         ]);
 
         Product::create([
             'name' => 'خودکار',
             'category_id' => '2',
-            'quantity' => '30',
+            'quantity' => 30,
         ]);
     }
 }
