@@ -17,8 +17,8 @@ class UsersSeeder extends Seeder
     {
         User::create([
             'username' => 'erfanemune',
-            'first_name' => 'Erfan',
-            'last_name' => 'Ghorbani',
+            'first_name' => 'عرفان',
+            'last_name' => 'قربانی',
             'national_code' => '0023227052',
             'phone_number' => '09366223096',
             'address' => 'Tehran, Hashemi rafsanjani highway, Sardarjangal street',
@@ -29,8 +29,8 @@ class UsersSeeder extends Seeder
 
         User::create([
             'username' => 'mrouhani',
-            'first_name' => 'Mohammadreza',
-            'last_name' => 'Rouhani',
+            'first_name' => 'محمد رضا',
+            'last_name' => 'روحانی',
             'national_code' => '0023227053',
             'phone_number' => '09366223097',
             'address' => 'Mazandaran, Tonekabon',
@@ -41,8 +41,8 @@ class UsersSeeder extends Seeder
 
         User::create([
             'username' => 'arghavanff',
-            'first_name' => 'Arghavan',
-            'last_name' => 'Falakfarsa',
+            'first_name' => 'ارغوان',
+            'last_name' => 'فلک فرسا',
             'national_code' => '0023227054',
             'phone_number' => '09366223098',
             'address' => 'West Azerbaijan, Urmia',
@@ -53,8 +53,8 @@ class UsersSeeder extends Seeder
 
         User::create([
             'username' => 'erfanb',
-            'first_name' => 'Erfan',
-            'last_name' => 'Bagheri',
+            'first_name' => 'عرفان',
+            'last_name' => 'باقری',
             'national_code' => '0023227055',
             'phone_number' => '09366223099',
             'address' => 'Tehran, Mehrabad street',

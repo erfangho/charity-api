@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
             AgentsSeeder::class,
             HelperSeeder::class,
             HelpSeekersSeeder::class,
+            ProductCategoriesSeeder::class,
+            ProductsSeeder::class,
         ]);
     }
 }

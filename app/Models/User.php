@@ -70,21 +70,21 @@ class User extends Authenticatable implements JWTSubject
 
     public function manager()
     {
-        return $this->hasOne(Manager::class);
+        return $this->hasOne(Manager::class, 'user_id');
     }
 
     public function agent()
     {
-        return $this->hasOne(Agent::class);
+        return $this->hasOne(Agent::class, 'user_id');
     }
 
     public function helper()
     {
-        return $this->hasOne(Helper::class);
+        return $this->hasOne(Helper::class, 'user_id');
     }
 
     public function helpSeeker()
     {
-        return $this->hasOne(HelpSeeker::class);
+        return $this->hasOne(HelpSeeker::class, 'user_id');
     }
 }

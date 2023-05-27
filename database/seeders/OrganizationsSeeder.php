@@ -15,7 +15,7 @@ class OrganizationsSeeder extends Seeder
     public function run(): void
     {
         Organization::create([
-            'name' => 'Emam Ali charity',
+            'name' => 'خیریه امام علی',
             'phone_number' => '02144858687',
             'description' => 'سازمان مرکزی خیریه در تهران',
             'address' => 'Tehran, Emam ali boulevard',

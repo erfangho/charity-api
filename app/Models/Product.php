@@ -5,12 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Helper extends Model
+class Product extends Model
 {
     use HasFactory;
 
-    public function user()
+    public function category()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(ProductCategory::class, 'category_id');
     }
 }
