@@ -23,6 +23,8 @@ class DatabaseSeeder extends Seeder
             PeopleAidsSeeder::class,
             PackagesSeeder::class,
             PackageItemsSeeder::class,
+            AidAllocationsSeeder::class,
+            PackageAllocationsSeeder::class,
         ]);
     }
 }

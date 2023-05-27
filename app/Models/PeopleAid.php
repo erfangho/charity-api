@@ -19,4 +19,9 @@ class PeopleAid extends Model
         'quantity',
         'description',
     ];
+
+    public function aidAllocations()
+    {
+        return $this->hasMany(AidAllocation::class, 'people_aid_id');
+    }
 }

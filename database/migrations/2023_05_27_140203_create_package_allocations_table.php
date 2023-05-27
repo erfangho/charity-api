@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('package_items', function (Blueprint $table) {
+        Schema::create('package_allocations', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('product_id');
-            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+            $table->unsignedBigInteger('agent_id');
+            $table->string('status');
+            $table->foreign('agent_id')->references('id')->on('agents')->onDelete('cascade');
+            $table->unsignedBigInteger('help_seeker_id');
+            $table->foreign('help_seeker_id')->references('id')->on('help_seekers')->onDelete('cascade');
             $table->unsignedBigInteger('package_id');
             $table->foreign('package_id')->references('id')->on('packages')->onDelete('cascade');
-            $table->integer('quantity');
             $table->timestamps();
         });
     }
@@ -27,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('package_items');
+        Schema::dropIfExists('package_alocations');
     }
 };
