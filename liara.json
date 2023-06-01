@@ -1,0 +1,7 @@
+{
+    "platform": "laravel",
+    "app": "charity-back",
+    "laravel": {
+        "phpVersion": "8.1"
+    }
+}
