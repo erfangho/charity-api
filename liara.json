@@ -2,6 +2,6 @@
     "platform": "laravel",
     "app": "charity-back",
     "laravel": {
-        "phpVersion": "8.1"
+        "phpVersion": "8.0"
     }
 }
