@@ -70,10 +70,10 @@ class OrganizationController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required|string',
-            'phone_number' => 'required|string',
+            'name' => 'string',
+            'phone_number' => 'string',
             'description' => 'string',
-            'address' => 'required|string',
+            'address' => 'string',
         ]);
 
         $organization = Organization::findOrFail($id);

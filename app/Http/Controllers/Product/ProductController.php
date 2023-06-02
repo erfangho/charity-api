@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Product;
 
 use App\Http\Controllers\Controller;
-use App\Models\ProductCategory;
+use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class ProductCategoryController extends Controller
+class ProductController extends Controller
 {
     public function __construct()
     {
@@ -15,19 +15,19 @@ class ProductCategoryController extends Controller
     }
 
     /**
-     * Display a listing of the product categories.
+     * Display a listing of the products.
      *
      * @return JsonResponse
      */
     public function index()
     {
-        $productCategories = ProductCategory::all();
+        $products = Product::all();
 
-        return response()->json($productCategories);
+        return response()->json($products);
     }
 
     /**
-     * Store a newly created product category in storage.
+     * Store a newly created product in storage.
      *
      * @param Request $request
      * @return JsonResponse
@@ -36,57 +36,61 @@ class ProductCategoryController extends Controller
     {
         $request->validate([
             'name' => 'required|string',
+            'category_id' => 'required|exists:product_categories,id',
+            'quantity' => 'required|integer',
             'description' => 'nullable|string',
         ]);
 
-        $productCategory = ProductCategory::create($request->all());
+        $product = Product::create($request->all());
 
-        return response()->json($productCategory, 201);
+        return response()->json($product, 201);
     }
 
     /**
-     * Display the specified product category.
+     * Display the specified product.
      *
-     * @param  int  $id
+     * @param int $id
      * @return JsonResponse
      */
     public function show($id)
     {
-        $productCategory = ProductCategory::findOrFail($id);
+        $product = Product::findOrFail($id);
 
-        return response()->json($productCategory);
+        return response()->json($product);
     }
 
     /**
-     * Update the specified product category in storage.
+     * Update the specified product in storage.
      *
      * @param Request $request
-     * @param  int  $id
+     * @param int $id
      * @return JsonResponse
      */
     public function update(Request $request, $id)
     {
         $request->validate([
             'name' => 'string',
+            'category_id' => 'exists:product_categories,id',
+            'quantity' => 'integer',
             'description' => 'nullable|string',
         ]);
 
-        $productCategory = ProductCategory::findOrFail($id);
-        $productCategory->update($request->all());
+        $product = Product::findOrFail($id);
+        $product->update($request->all());
 
-        return response()->json($productCategory);
+        return response()->json($product);
     }
 
     /**
-     * Remove the specified product category from storage.
+     * Remove the specified product from storage.
      *
-     * @param  int  $id
+     * @param int $id
      * @return JsonResponse
      */
     public function destroy($id)
     {
-        $productCategory = ProductCategory::findOrFail($id);
-        $productCategory->delete();
+        $product = Product::findOrFail($id);
+        $product->delete();
 
         return response()->json(null, 204);
     }
