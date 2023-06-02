@@ -16,6 +16,8 @@ class PeopleAid extends Model
      */
     protected $fillable = [
         'title',
+        'product_id',
+        'helper_id',
         'quantity',
         'description',
     ];

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Aid\PeopleAidController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Organization\OrganizationController;
 use App\Http\Controllers\Product\ProductCategoryController;
@@ -30,3 +31,5 @@ Route::apiResource('organizations', OrganizationController::class);
 Route::apiResource('product-categories', ProductCategoryController::class);
 
 Route::apiResource('products', ProductController::class);
+
+Route::apiResource('people-aids', PeopleAidController::class);
