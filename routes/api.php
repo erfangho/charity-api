@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Organization\OrganizationController;
+use App\Http\Controllers\Product\ProductCategoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -24,3 +25,5 @@ Route::controller(AuthController::class)->group(function () {
 });
 
 Route::apiResource('organizations', OrganizationController::class);
+
+Route::apiResource('product-categories', ProductCategoryController::class);
