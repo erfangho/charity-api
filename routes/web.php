@@ -12,4 +12,6 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-
+Route::get('ci-cd', function () {
+    return response()->json(['message' => 'active'], 200);
+});
