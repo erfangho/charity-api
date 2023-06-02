@@ -3,6 +3,11 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Agent;
+use App\Models\Helper;
+use App\Models\HelpSeeker;
+use App\Models\Manager;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -10,7 +15,7 @@ class AuthController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login','register']]);
+        $this->middleware('auth:api', ['except' => ['login']]);
     }
 
     public function login(Request $request)
@@ -41,30 +46,93 @@ class AuthController extends Controller
 
     }
 
-//    public function register(Request $request){
-//        $request->validate([
-//            'name' => 'required|string|max:255',
-//            'email' => 'required|string|email|max:255|unique:users',
-//            'password' => 'required|string|min:6',
-//        ]);
-//
-//        $user = User::create([
-//            'name' => $request->name,
-//            'email' => $request->email,
-//            'password' => Hash::make($request->password),
-//        ]);
-//
-//        $token = Auth::login($user);
-//        return response()->json([
-//            'status' => 'success',
-//            'message' => 'User created successfully',
-//            'user' => $user,
-//            'authorisation' => [
-//                'token' => $token,
-//                'type' => 'bearer',
-//            ]
-//        ]);
-//    }
+    public function register(Request $request, $role){
+        if ($role == 'manager' and $request['role'] == 'manager') {
+            if (Auth::user()->role == 'manager') {
+                $newUser = $this->registerUser($request);
+
+                $newManager = Manager::create([
+                    'organization_id' => $request['organization_id'],
+                    'user_id' => $newUser['id'],
+                ]);
+
+                $newUserData = [
+                    'user' => $newUser,
+                    'manager' => $newManager,
+                ];
+
+            } else {
+                return response()->json([], 403);
+            }
+        } else if ($role == 'agent' and $request['role'] == 'agent') {
+            if (Auth::user()->role == 'manager') {
+                $newUser = $this->registerUser($request);
+
+                $newAgent = Agent::create([
+                    'organization_id' => $request['organization_id'],
+                    'user_id' => $newUser['id'],
+                ]);
+
+                $newUserData = [
+                    'user' => $newUser,
+                    'agent' => $newAgent,
+                ];
+
+            } else {
+                return response()->json([], 403);
+            }
+        } else if ($role == 'helper' and $request['role'] == 'helper') {
+            if (Auth::user()->role == 'agent') {
+                $newUser = $this->registerUser($request);
+
+                $newHelper = Helper::create([
+                    'agent_id' => Auth::user()->agent->id,
+                    'user_id' => $newUser['id'],
+                ]);
+
+                $newUserData = [
+                    'user' => $newUser,
+                    'agent' => $newHelper,
+                ];
+
+            } else {
+                return response()->json([], 403);
+            }
+        } else if ($role == 'help-seeker' and $request['role'] == 'help-seeker') {
+            if (Auth::user()->role == 'agent') {
+                $newUser = $this->registerUser($request);
+
+                $newHelper = HelpSeeker::create([
+                    'agent_id' => Auth::user()->agent->id,
+                    'user_id' => $newUser['id'],
+                    'rate' => $request['rate'],
+                ]);
+
+                $newUserData = [
+                    'user' => $newUser,
+                    'agent' => $newHelper,
+                ];
+
+            } else {
+                return response()->json([], 403);
+            }
+        } else {
+            return response()->json([], 404);
+        }
+
+
+        $token = Auth::login($newUserData['user']);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'User created successfully',
+            'details' => $newUserData,
+            'authorisation' => [
+                'token' => $token,
+                'type' => 'bearer',
+            ]
+        ]);
+    }
 
     public function logout()
     {
@@ -85,5 +153,36 @@ class AuthController extends Controller
                 'type' => 'bearer',
             ]
         ]);
+    }
+
+    private function registerUser(Request $request)
+    {
+        $validatedData = $request->validate([
+            'username' => 'required|string|unique:users,username',
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'national_code' => 'required|string|unique:users,national_code',
+            'phone_number' => 'required|string|unique:users,phone_number',
+            'email' => 'required|string|unique:users,email',
+            'address' => 'required|string',
+            'password' => 'required|string',
+            'role' => 'required|string',
+        ]);
+
+        $request->except('organization_id', 'rate');
+
+        $user = User::create([
+            'username' => $validatedData['username'],
+            'first_name' => $validatedData['first_name'],
+            'last_name' => $validatedData['last_name'],
+            'national_code' => $validatedData['national_code'],
+            'phone_number' => $validatedData['phone_number'],
+            'email' => $validatedData['email'],
+            'address' => $validatedData['address'],
+            'password' => $validatedData['password'],
+            'role' => $validatedData['role'],
+        ]);
+
+        return $user;
     }
 }

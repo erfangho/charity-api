@@ -16,6 +16,8 @@ class HelpSeeker extends Model
      */
     protected $fillable = [
         'rate',
+        'user_id',
+        'agent_id',
     ];
 
     public function user()

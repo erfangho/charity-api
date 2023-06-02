@@ -9,6 +9,16 @@ class Helper extends Model
 {
     use HasFactory;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'user_id',
+        'agent_id',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
