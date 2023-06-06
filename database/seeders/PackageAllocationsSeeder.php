@@ -15,6 +15,7 @@ class PackageAllocationsSeeder extends Seeder
     {
         PackageAllocation::create([
             'agent_id' => '1',
+            'quantity' => '2',
             'help_seeker_id' => '1',
             'package_id' => '1',
             'status' => 'unallocated',

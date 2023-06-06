@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('agent_id');
             $table->string('status');
+            $table->integer('quantity');
             $table->foreign('agent_id')->references('id')->on('agents')->onDelete('cascade');
             $table->unsignedBigInteger('help_seeker_id');
             $table->foreign('help_seeker_id')->references('id')->on('help_seekers')->onDelete('cascade');

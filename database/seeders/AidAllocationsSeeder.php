@@ -15,6 +15,7 @@ class AidAllocationsSeeder extends Seeder
     {
         AidAllocation::create([
             'agent_id' => '1',
+            'quantity' => '2',
             'help_seeker_id' => '1',
             'people_aid_id' => '1',
             'status' => 'unallocated',

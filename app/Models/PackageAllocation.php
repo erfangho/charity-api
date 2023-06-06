@@ -15,7 +15,11 @@ class PackageAllocation extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'agent_id',
         'status',
+        'quantity',
+        'help_seeker_id',
+        'package_id',
     ];
 
     public function agent()
