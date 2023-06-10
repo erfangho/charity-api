@@ -18,7 +18,31 @@ class AidAllocationsSeeder extends Seeder
             'quantity' => '2',
             'help_seeker_id' => '1',
             'people_aid_id' => '1',
-            'status' => 'unallocated',
+            'status' => 'assigned',
+        ]);
+
+        AidAllocation::create([
+            'agent_id' => '1',
+            'quantity' => '2',
+            'help_seeker_id' => '1',
+            'people_aid_id' => '1',
+            'status' => 'not_assigned',
+        ]);
+
+        AidAllocation::create([
+            'agent_id' => '1',
+            'quantity' => '2',
+            'help_seeker_id' => '1',
+            'people_aid_id' => '1',
+            'status' => 'assigned',
+        ]);
+
+        AidAllocation::create([
+            'agent_id' => '1',
+            'quantity' => '2',
+            'help_seeker_id' => '1',
+            'people_aid_id' => '1',
+            'status' => 'assigned',
         ]);
     }
 }

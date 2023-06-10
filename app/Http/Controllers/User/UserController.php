@@ -13,12 +13,23 @@ class UserController extends Controller
         $this->middleware('auth:api');
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::all();
+        $query = User::query();
+
+        $userRole = $request['role'];
+
+        if ($userRole) {
+            $query->where('role', $userRole);
+        }
+
+        $users = $query->get();
+
+        $userCount = $users->count();
 
         return response()->json([
             'users' => $users,
+            'count' => $userCount,
         ]);
     }
 

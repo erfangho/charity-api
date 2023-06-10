@@ -26,4 +26,9 @@ class PeopleAid extends Model
     {
         return $this->hasMany(AidAllocation::class, 'people_aid_id');
     }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id', 'id');
+    }
 }

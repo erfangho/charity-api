@@ -36,7 +36,8 @@ class ProductController extends Controller
     {
         $request->validate([
             'name' => 'required|string',
-            'category_id' => 'required|exists:product_categories,id',
+            'category_id' => 'exists:product_categories,id',
+            'type' => ['required', 'in:product,cash'],
             'quantity' => 'required|integer',
             'description' => 'nullable|string',
         ]);
@@ -71,6 +72,7 @@ class ProductController extends Controller
         $request->validate([
             'name' => 'string',
             'category_id' => 'exists:product_categories,id',
+            'type' => ['in:product,cash'],
             'quantity' => 'integer',
             'description' => 'nullable|string',
         ]);

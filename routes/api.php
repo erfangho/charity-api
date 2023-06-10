@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Aid\AidAllocationController;
 use App\Http\Controllers\Aid\PackageController;
 use App\Http\Controllers\Aid\PeopleAidController;
 use App\Http\Controllers\Auth\AuthController;
@@ -45,3 +46,7 @@ Route::apiResource('products', ProductController::class);
 Route::apiResource('people-aids', PeopleAidController::class);
 
 Route::apiResource('packages', PackageController::class);
+
+Route::prefix('aid-allocations')->group(function () {
+    Route::get('/', [AidAllocationController::class, 'index']);
+});

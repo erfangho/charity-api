@@ -16,12 +16,20 @@ class ProductsSeeder extends Seeder
         Product::create([
             'name' => 'کاپشن',
             'category_id' => '1',
+            'type' => 'product',
             'quantity' => 30,
         ]);
 
         Product::create([
             'name' => 'خودکار',
             'category_id' => '2',
+            'type' => 'product',
+            'quantity' => 30,
+        ]);
+
+        Product::create([
+            'name' => 'نقدی',
+            'type' => 'cash',
             'quantity' => 30,
         ]);
     }

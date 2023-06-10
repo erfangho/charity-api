@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Aid;
 
 use App\Http\Controllers\Controller;
 use App\Models\PeopleAid;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,12 +22,58 @@ class PeopleAidController extends Controller
      *
      * @return JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
         if (Gate::allows('is-manager-or-agent')) {
-            $peopleAids = PeopleAid::all();
+            $startHour = $request['start_hour'];
+            $endHour = $request['end_hour'];
+            $startDate = $request['start_date'];
+            $endDate = $request['end_date'];
+            $aidType = $request['type'];
 
-            return response()->json($peopleAids);
+            $query = PeopleAid::query();
+
+            if ($startDate && $endDate) {
+                if ($startHour && $endHour) {
+                    $startDateTime = Carbon::parse($startDate . ' ' . $startHour);
+                    $endDateTime = Carbon::parse($endDate . ' ' . $endHour);
+
+                    $query->whereBetween('created_at', [$startDateTime, $endDateTime]);
+                } else {
+                    $startDateTime = Carbon::parse($startDate )->startOfDay();
+                    $endDateTime = Carbon::parse($endDate)->endOfDay();
+
+                    $query->whereBetween('created_at', [$startDateTime, $endDateTime]);
+                }
+            } elseif (empty($startDate) && empty($endDate)) {
+                if ($startHour && $endHour) {
+                    $startDateTime = Carbon::parse($startHour);
+                    $endDateTime = Carbon::parse($endHour);
+
+                    $query->whereBetween('created_at', [$startDateTime, $endDateTime]);
+                }
+            }
+
+            if ($aidType) {
+                $query->whereHas('product', function ($query) use ($aidType) {
+                    $query->where('type', $aidType);
+                });
+
+                if ($aidType == 'cash') {
+                    $peopleAidsCount = $query->sum('quantity');
+                } else if ($aidType == 'product') {
+                    $peopleAidsCount = $query->count();
+                }
+            } else {
+                $peopleAidsCount = $query->count();
+            }
+
+            $peopleAids = $query->paginate(10);
+
+            return response()->json([
+                'peopleAids' => $peopleAids->all(),
+                'count' => $peopleAidsCount,
+            ]);
         } else {
             $user = Auth::user();
 
