@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 // use Illuminate\Support\Facades\Gate;
+use App\Models\User;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -16,11 +18,14 @@ class AuthServiceProvider extends ServiceProvider
         //
     ];
 
+
     /**
      * Register any authentication / authorization services.
      */
     public function boot(): void
     {
-        //
+        Gate::define('is-manager-or-agent', function (User $user) {
+            return $user->role === 'manager' or $user->role === 'agent';
+        });
     }
 }

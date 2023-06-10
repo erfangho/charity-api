@@ -38,7 +38,7 @@ class AuthController extends Controller
         return response()->json([
             'status' => 'success',
             'user' => $user,
-            'authorisation' => [
+            'authorization' => [
                 'token' => $token,
                 'type' => 'bearer',
             ]
@@ -127,7 +127,7 @@ class AuthController extends Controller
             'status' => 'success',
             'message' => 'User created successfully',
             'details' => $newUserData,
-            'authorisation' => [
+            'authorization' => [
                 'token' => $token,
                 'type' => 'bearer',
             ]
@@ -148,7 +148,7 @@ class AuthController extends Controller
         return response()->json([
             'status' => 'success',
             'user' => Auth::user(),
-            'authorisation' => [
+            'authorization' => [
                 'token' => Auth::refresh(),
                 'type' => 'bearer',
             ]
@@ -184,5 +184,25 @@ class AuthController extends Controller
         ]);
 
         return $user;
+    }
+
+    public function getUserByToken(Request $request)
+    {
+        $user = Auth::user();
+
+        if ($user->role == 'manager') {
+            $roleDetails['manager'] = $user->manager;
+        } else if ($user->role == 'agent') {
+            $roleDetails['agent'] = $user->agent;
+        } else if ($user->role == 'helper') {
+            $roleDetails['helper'] = $user->helper;
+        } else if ($user->role == 'help_seeker') {
+            $roleDetails['help_seeker'] = $user->helpSeeker;
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'user' => $user,
+        ]);
     }
 }

@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Aid;
 
 use App\Http\Controllers\Controller;
 use App\Models\Package;
+use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PackageController extends Controller
 {
@@ -21,9 +24,23 @@ class PackageController extends Controller
      */
     public function index()
     {
-        $packages = Package::all();
+        if (Gate::allows('is-manager-or-agent')) {
+            $packages = Package::all();
 
-        return response()->json($packages);
+            return response()->json($packages);
+        } else {
+            $user = Auth::user();
+
+            $packages = Package::all();
+
+            if ($user->role == 'help_seeker') {
+                $helpSeeker = $user->helpSeeker;
+
+                return response()->json($helpSeeker->packageAllocations);
+            } else {
+                return response()->json(['message' => 'access denied'], 403);
+            }
+        }
     }
 
     /**
@@ -34,16 +51,20 @@ class PackageController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'title' => 'required|string',
-            'organization_id' => 'required|exists:organizations,id',
-            'quantity' => 'required|integer',
-            'description' => 'nullable|string',
-        ]);
+        if (Gate::allows('is-manager-or-agent')) {
+            $request->validate([
+                'title' => 'required|string',
+                'organization_id' => 'required|exists:organizations,id',
+                'quantity' => 'required|integer',
+                'description' => 'nullable|string',
+            ]);
 
-        $package = Package::create($request->all());
+            $package = Package::create($request->all());
 
-        return response()->json($package, 201);
+            return response()->json($package, 201);
+        } else {
+            return response()->json(['message' => 'access denied'], 403);
+        }
     }
 
     /**
@@ -68,17 +89,21 @@ class PackageController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'title' => 'string',
-            'organization_id' => 'exists:organizations,id',
-            'quantity' => 'integer',
-            'description' => 'nullable|string',
-        ]);
+        if (Gate::allows('is-manager-or-agent')) {
+            $request->validate([
+                'title' => 'string',
+                'organization_id' => 'exists:organizations,id',
+                'quantity' => 'integer',
+                'description' => 'nullable|string',
+            ]);
 
-        $package = Package::findOrFail($id);
-        $package->update($request->all());
+            $package = Package::findOrFail($id);
+            $package->update($request->all());
 
-        return response()->json($package);
+            return response()->json($package);
+        } else {
+            return response()->json(['message' => 'access denied'], 403);
+        }
     }
 
     /**
@@ -89,9 +114,13 @@ class PackageController extends Controller
      */
     public function destroy($id)
     {
-        $package = Package::findOrFail($id);
-        $package->delete();
+        if (Gate::allows('is-manager-or-agent')) {
+            $package = Package::findOrFail($id);
+            $package->delete();
 
-        return response()->json(null, 204);
+            return response()->json(null, 204);
+        } else {
+            return response()->json(['message' => 'access denied'], 403);
+        }
     }
 }

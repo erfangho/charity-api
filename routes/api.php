@@ -25,6 +25,7 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('register/{role}', 'register');
     Route::post('logout', 'logout');
     Route::post('refresh', 'refresh');
+    Route::post('/users/me', 'getUserByToken');
 });
 
 Route::apiResource('organizations', OrganizationController::class);

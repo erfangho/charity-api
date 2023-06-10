@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\PeopleAid;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class PeopleAidController extends Controller
 {
@@ -21,9 +23,23 @@ class PeopleAidController extends Controller
      */
     public function index()
     {
-        $peopleAids = PeopleAid::all();
+        if (Gate::allows('is-manager-or-agent')) {
+            $peopleAids = PeopleAid::all();
 
-        return response()->json($peopleAids);
+            return response()->json($peopleAids);
+        } else {
+            $user = Auth::user();
+
+            $peopleAids = PeopleAid::all();
+
+            if ($user->role == 'help_seeker') {
+                $helpSeeker = $user->helpSeeker;
+
+                return response()->json($helpSeeker->aidAllocations);
+            } else {
+                return response()->json(['message' => 'Access denied'], 403);
+            }
+        }
     }
 
     /**
@@ -34,17 +50,21 @@ class PeopleAidController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'title' => 'required|string',
-            'product_id' => 'required|exists:products,id',
-            'helper_id' => 'required|exists:helpers,id',
-            'quantity' => 'required|integer',
-            'description' => 'nullable|string',
-        ]);
+        if (Gate::allows('is-manager-or-agent')) {
+            $request->validate([
+                'title' => 'required|string',
+                'product_id' => 'required|exists:products,id',
+                'helper_id' => 'required|exists:helpers,id',
+                'quantity' => 'required|integer',
+                'description' => 'nullable|string',
+            ]);
 
-        $peopleAid = PeopleAid::create($request->all());
+            $peopleAid = PeopleAid::create($request->all());
 
-        return response()->json($peopleAid, 201);
+            return response()->json($peopleAid, 201);
+        } else {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
     }
 
     /**
@@ -55,9 +75,13 @@ class PeopleAidController extends Controller
      */
     public function show($id)
     {
-        $peopleAid = PeopleAid::findOrFail($id);
+        if (Gate::allows('is-manager-or-agent')) {
+            $peopleAid = PeopleAid::findOrFail($id);
 
-        return response()->json($peopleAid);
+            return response()->json($peopleAid);
+        } else {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
     }
 
     /**
@@ -69,18 +93,22 @@ class PeopleAidController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'title' => 'string',
-            'product_id' => 'exists:products,id',
-            'helper_id' => 'exists:helpers,id',
-            'quantity' => 'integer',
-            'description' => 'nullable|string',
-        ]);
+        if (Gate::allows('is-manager-or-agent')) {
+            $request->validate([
+                'title' => 'string',
+                'product_id' => 'exists:products,id',
+                'helper_id' => 'exists:helpers,id',
+                'quantity' => 'integer',
+                'description' => 'nullable|string',
+            ]);
 
-        $peopleAid = PeopleAid::findOrFail($id);
-        $peopleAid->update($request->all());
+            $peopleAid = PeopleAid::findOrFail($id);
+            $peopleAid->update($request->all());
 
-        return response()->json($peopleAid);
+            return response()->json($peopleAid);
+        } else {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
     }
 
     /**
@@ -91,9 +119,13 @@ class PeopleAidController extends Controller
      */
     public function destroy($id)
     {
-        $peopleAid = PeopleAid::findOrFail($id);
-        $peopleAid->delete();
+        if (Gate::allows('is-manager-or-agent')) {
+            $peopleAid = PeopleAid::findOrFail($id);
+            $peopleAid->delete();
 
-        return response()->json(null, 204);
+            return response()->json(null, 204);
+        } else {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
     }
 }

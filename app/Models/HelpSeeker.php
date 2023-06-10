@@ -29,4 +29,9 @@ class HelpSeeker extends Model
     {
         return $this->hasMany(AidAllocation::class, 'help_seeker_id');
     }
+
+    public function packageAllocations()
+    {
+        return $this->hasMany(PackageAllocation::class, 'help_seeker_id');
+    }
 }
