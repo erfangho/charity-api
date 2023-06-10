@@ -191,13 +191,13 @@ class AuthController extends Controller
         $user = Auth::user();
 
         if ($user->role == 'manager') {
-            $roleDetails['manager'] = $user->manager;
+            $user->manager;
         } else if ($user->role == 'agent') {
-            $roleDetails['agent'] = $user->agent;
+            $user->agent;
         } else if ($user->role == 'helper') {
-            $roleDetails['helper'] = $user->helper;
+            $user->helper;
         } else if ($user->role == 'help_seeker') {
-            $roleDetails['help_seeker'] = $user->helpSeeker;
+            $user->helpSeeker;
         }
 
         return response()->json([

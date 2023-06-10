@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Organization\OrganizationController;
 use App\Http\Controllers\Product\ProductCategoryController;
 use App\Http\Controllers\Product\ProductController;
+use App\Http\Controllers\User\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +27,13 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('logout', 'logout');
     Route::post('refresh', 'refresh');
     Route::post('/users/me', 'getUserByToken');
+});
+
+Route::prefix('users')->group(function () {
+    Route::get('/', [UserController::class, 'index']);
+    Route::get('/{id}', [UserController::class, 'show']);
+    Route::put('/{id}', [UserController::class, 'update']);
+    Route::delete('/{id}', [UserController::class, 'destroy']);
 });
 
 Route::apiResource('organizations', OrganizationController::class);

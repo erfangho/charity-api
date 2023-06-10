@@ -8,12 +8,16 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+    }
+
     public function index()
     {
         $users = User::all();
 
         return response()->json([
-            'status' => 'success',
             'users' => $users,
         ]);
     }
@@ -21,6 +25,16 @@ class UserController extends Controller
     public function show($id)
     {
         $user = User::find($id);
+
+        if ($user->role == 'manager') {
+            $user->manager;
+        } else if ($user->role == 'agent') {
+            $user->agent;
+        } else if ($user->role == 'helper') {
+            $user->helper;
+        } else if ($user->role == 'help_seeker') {
+            $user->helpSeeker;
+        }
 
         if (!$user) {
             return response()->json([
@@ -38,7 +52,6 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         $user = User::find($id);
-
         if (!$user) {
             return response()->json([
                 'status' => 'error',
@@ -47,28 +60,18 @@ class UserController extends Controller
         }
 
         $validatedData = $request->validate([
-            'username' => 'required|string|unique:users,username,' . $id,
-            'first_name' => 'required|string',
-            'last_name' => 'required|string',
-            'national_code' => 'required|string|unique:users,national_code,' . $id,
-            'phone_number' => 'required|string|unique:users,phone_number,' . $id,
-            'email' => 'required|string|unique:users,email,' . $id,
-            'address' => 'required|string',
-            'password' => 'required|string',
-            'role' => 'required|string',
+            'username' => 'string|unique:users,username,' . $id,
+            'first_name' => 'string',
+            'last_name' => 'string',
+            'national_code' => 'string|unique:users,national_code,' . $id,
+            'phone_number' => 'string|unique:users,phone_number,' . $id,
+            'email' => 'string|unique:users,email,' . $id,
+            'address' => 'string',
+            'password' => 'string',
+            'role' => 'string',
         ]);
 
-        $user->username = $validatedData['username'];
-        $user->first_name = $validatedData['first_name'];
-        $user->last_name = $validatedData['last_name'];
-        $user->national_code = $validatedData['national_code'];
-        $user->phone_number = $validatedData['phone_number'];
-        $user->email = $validatedData['email'];
-        $user->address = $validatedData['address'];
-        $user->password = $validatedData['password'];
-        $user->role = $validatedData['role'];
-
-        $user->save();
+        $user->update($validatedData);
 
         return response()->json([
             'status' => 'success',
