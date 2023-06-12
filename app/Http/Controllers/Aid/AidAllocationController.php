@@ -18,20 +18,22 @@ class AidAllocationController extends Controller
      */
     public function index(Request $request)
     {
-        $aidAllocation = AidAllocation::orderBy('created_at', 'desc');
+        $aidAllocations = AidAllocation::orderBy('created_at', 'desc');
 
 
         $aidStatus = $request['status'];
 
         if ($aidStatus) {
-            $aidAllocation->where('status', $aidStatus);
+            $aidAllocations->where('status', $aidStatus);
         }
 
-        $aidAllocation->paginate(10);
+        $aidAllocations->with('agent', 'helpSeeker', 'peopleAid');
+
+        $aidAllocations->paginate(10);
 
         return response()->json([
-            'allocations' => $aidAllocation->get(),
-            'count' => $aidAllocation->count(),
+            'allocations' => $aidAllocations->get(),
+            'count' => $aidAllocations->count(),
         ]);
     }
 }
