@@ -31,4 +31,10 @@ class PeopleAid extends Model
     {
         return $this->belongsTo(Product::class, 'product_id', 'id');
     }
+
+    public function helper()
+    {
+        return $this->belongsTo(Helper::class, 'helper_id', 'id');
+    }
+
 }

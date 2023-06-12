@@ -23,4 +23,10 @@ class Helper extends Model
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
+
+    public function peopleAid()
+    {
+        return $this->hasMany(PeopleAid::class, 'helper_id', 'id');
+    }
+
 }
