@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Aid\AidAllocationController;
+use App\Http\Controllers\Aid\PackageAllocationController;
 use App\Http\Controllers\Aid\PackageController;
 use App\Http\Controllers\Aid\PeopleAidController;
 use App\Http\Controllers\Auth\AuthController;
@@ -48,3 +49,5 @@ Route::apiResource('people-aids', PeopleAidController::class);
 Route::apiResource('packages', PackageController::class);
 
 Route::apiResource('aid-allocations', AidAllocationController::class);
+
+Route::apiResource('package-allocations', PackageAllocationController::class);

@@ -28,6 +28,6 @@ class Product extends Model
 
     public function packageItems()
     {
-        return $this->hasMany(PackageItem::class, 'product_id');
+        return $this->belongsTo(PackageItem::class, 'product_id');
     }
 }
