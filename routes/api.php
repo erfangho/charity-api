@@ -47,6 +47,4 @@ Route::apiResource('people-aids', PeopleAidController::class);
 
 Route::apiResource('packages', PackageController::class);
 
-Route::prefix('aid-allocations')->group(function () {
-    Route::get('/', [AidAllocationController::class, 'index']);
-});
+Route::apiResource('aid-allocations', AidAllocationController::class);
