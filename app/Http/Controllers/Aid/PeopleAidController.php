@@ -67,11 +67,30 @@ class PeopleAidController extends Controller
             } else {
                 $peopleAidsCount = $query->count();
             }
+            
+            $query->with([
+                'helper.user' => function ($query) {
+                    $query->select('id', 'first_name', 'last_name');
+                },
+            ]);
 
             $peopleAids = $query->paginate(10);
 
+            $transformedAllocations = $peopleAids->map(function ($allocation) {
+                $allocation['helper_name'] = [
+                    'first_name' => $allocation->helper->user->first_name,
+                    'last_name' => $allocation->helper->user->last_name
+                ];
+
+                unset($allocation->agent);
+                unset($allocation->helper);
+
+                return $allocation;
+
+            });
+
             return response()->json([
-                'peopleAids' => $peopleAids->all(),
+                'peopleAids' => $transformedAllocations,
                 'count' => $peopleAidsCount,
             ]);
         } else {
