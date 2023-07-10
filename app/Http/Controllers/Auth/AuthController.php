@@ -40,6 +40,7 @@ class AuthController extends Controller
             'user' => $user,
             'authorization' => [
                 'token' => $token,
+                'refresh_token' => Auth::refresh(),
                 'type' => 'bearer',
             ]
         ]);
