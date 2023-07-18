@@ -23,13 +23,11 @@ class UserController extends Controller
             $query->where('role', $userRole);
         }
 
-        $users = $query->get();
-
-        $userCount = $users->count();
+        $query->paginate(10);
 
         return response()->json([
-            'users' => $users,
-            'count' => $userCount,
+            'users' => $query->get(),
+            'count' => $query->count(),
         ]);
     }
 
