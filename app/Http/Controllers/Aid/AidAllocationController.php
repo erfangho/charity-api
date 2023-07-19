@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Aid;
 
 use App\Http\Controllers\Controller;
 use App\Models\AidAllocation;
+use App\Models\PeopleAid;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -102,6 +103,18 @@ class AidAllocationController extends Controller
             if (empty($validatedData['status'])) {
                 $validatedData['status'] = 'not_assigned';
             }
+
+            $peopleAid = PeopleAid::where('id', $validatedData['people_aid_id'])->first();
+
+            $deductFromPeopleAid = $peopleAid->quantity - $validatedData['quantity'];
+            
+            if ($deductFromPeopleAid >= 0) {
+                $peopleAid->quantity = $deductFromPeopleAid;
+                $peopleAid->save();
+            } else {
+                return response()->json(['message' => 'qauntity of people aid is not enough'], 422);
+            }
+            
 
             $aidAllocation = AidAllocation::create($validatedData);
 
