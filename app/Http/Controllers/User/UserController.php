@@ -50,7 +50,7 @@ class UserController extends Controller
                     'username' => $user->username,
                     'first_name' => $user->first_name,
                     'last_name' => $user->last_name,
-                    'phone' => $user->phone_number,
+                    'phone_number' => $user->phone_number,
                     'total_cash' => isset($user->totalCash) ? $user->totalCash : null,
                     'total_product' => isset($user->totalProduct) ? $user->totalProduct : null,
                 ];
