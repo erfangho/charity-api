@@ -26,9 +26,13 @@ class UserController extends Controller
         $query->when($userRole == 'helper', function ($q) {
             $q->with(['helper.peopleAids.product']);
         });
+
+        $query->when($userRole == 'help_seeker', function ($q) {
+            $q->with(['helpSeeker.aidAllocations.peopleAid']);
+        });
     
         $users = $query->paginate(10);
-    
+        
         if ($userRole == 'helper') {
             $users->each(function ($user) {
                 $totalCash = $user->helper->peopleAids->filter(function ($peopleAid) {
@@ -53,6 +57,32 @@ class UserController extends Controller
                     'phone_number' => $user->phone_number,
                     'total_cash' => isset($user->totalCash) ? $user->totalCash : null,
                     'total_product' => isset($user->totalProduct) ? $user->totalProduct : null,
+                ];
+            });
+        } else if ($userRole == 'help_seeker') {
+            $users->each(function ($user) {
+                $totalCashAllocated = $user->helpSeeker->aidAllocations->filter(function ($aidAllocations) {
+                    return $aidAllocations->peopleAid->product->type === 'cash';
+                })->sum('quantity');
+
+                $totalProductAllocated = $user->helpSeeker->aidAllocations->filter(function ($aidAllocations) {
+                    return $aidAllocations->peopleAid->product->type === 'product';
+                })->sum('quantity');
+    
+                $user->totalCashAllocated = $totalCashAllocated;
+                $user->totalProductAllocated = $totalProductAllocated;
+                unset($user->helpSeekr);
+            });
+
+            $users = $users->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'username' => $user->username,
+                    'first_name' => $user->first_name,
+                    'last_name' => $user->last_name,
+                    'phone_number' => $user->phone_number,
+                    'total_cash_allocated' => isset($user->totalCashAllocated) ? $user->totalCashAllocated : null,
+                    'total_product_allocated' => isset($user->totalProductAllocated) ? $user->totalProductAllocated : null,
                 ];
             });
         } else {
