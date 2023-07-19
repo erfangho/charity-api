@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Aid;
 
 use App\Http\Controllers\Controller;
 use App\Models\PeopleAid;
+use App\Models\Product;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -124,8 +125,18 @@ class PeopleAidController extends Controller
                 'quantity' => 'required|integer',
                 'description' => 'nullable|string',
             ]);
+            
+            $product = Product::where('name', $request['title'])->first();
 
-            $peopleAid = PeopleAid::create($request->all());
+            if ($product) {
+                $peopleAid = PeopleAid::create($request->all());
+
+                $product->quantity += $request['quantity'];
+                $product->update();
+            } else {
+                return response()->json(['message' => 'There is no product with this name'], 422);
+            }
+
 
             return response()->json($peopleAid, 201);
         } else {

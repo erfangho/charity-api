@@ -23,11 +23,44 @@ class UserController extends Controller
             $query->where('role', $userRole);
         }
 
-        $query->paginate(10);
+        $query->when($userRole == 'helper', function ($q) {
+            $q->with(['helper.peopleAids.product']);
+        });
+    
+        $users = $query->paginate(10);
+    
+        if ($userRole == 'helper') {
+            $users->each(function ($user) {
+                $totalCash = $user->helper->peopleAids->filter(function ($peopleAid) {
+                    return $peopleAid->product->type === 'cash';
+                })->sum('quantity');
+
+                $totalProduct = $user->helper->peopleAids->filter(function ($peopleAid) {
+                    return $peopleAid->product->type === 'product';
+                })->sum('quantity');
+    
+                $user->totalCash = $totalCash;
+                $user->totalProduct = $totalProduct;
+                unset($user->helper);
+            });
+
+            $users = $users->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'username' => $user->username,
+                    'first_name' => $user->first_name,
+                    'last_name' => $user->last_name,
+                    'total_cash' => isset($user->totalCash) ? $user->totalCash : null,
+                    'total_product' => isset($user->totalProduct) ? $user->totalProduct : null,
+                ];
+            });
+        } else {
+            $users = $query->get();
+        }
 
         return response()->json([
-            'users' => $query->get(),
-            'count' => $query->count(),
+            'users' => $users,
+            'count' => $users->count(),
         ]);
     }
 
