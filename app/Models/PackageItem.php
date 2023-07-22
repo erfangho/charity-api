@@ -17,6 +17,7 @@ class PackageItem extends Model
     protected $fillable = [
         'package_id',
         'product_id',
+        'quantity',
     ];
 
     public function product()

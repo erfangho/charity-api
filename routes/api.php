@@ -3,6 +3,7 @@
 use App\Http\Controllers\Aid\AidAllocationController;
 use App\Http\Controllers\Aid\PackageAllocationController;
 use App\Http\Controllers\Aid\PackageController;
+use App\Http\Controllers\Aid\PackageItemController;
 use App\Http\Controllers\Aid\PeopleAidController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Organization\OrganizationController;
@@ -47,6 +48,8 @@ Route::apiResource('products', ProductController::class);
 Route::apiResource('people-aids', PeopleAidController::class);
 
 Route::apiResource('packages', PackageController::class);
+
+Route::apiResource('package-items', PackageItemController::class);
 
 Route::apiResource('aid-allocations', AidAllocationController::class);
 
