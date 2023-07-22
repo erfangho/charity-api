@@ -22,12 +22,24 @@ class PackageController extends Controller
      *
      * @return JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
         if (Gate::allows('is-manager-or-agent')) {
-            $packages = Package::all();
+            $title = $request['title'];
 
-            return response()->json($packages);
+            $query = Package::query();
+
+            $query->when($title, function ($q) use ($title) {
+                $q->where('title', 'like', '%' . $title . '%');
+            });
+
+            $query->withCount('packageItems');
+
+            $query->paginate(10);
+
+            return response()->json([
+                'packages' => $query->get(),
+            ]);
         } else {
             $user = Auth::user();
 

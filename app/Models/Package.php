@@ -35,4 +35,9 @@ class Package extends Model
     {
         return $this->hasMany(Package::class, 'package_id');
     }
+
+    public function packageItems()
+    {
+        return $this->hasMany(PackageItem::class, 'package_id');
+    }
 }
