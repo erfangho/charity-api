@@ -18,6 +18,9 @@ class UserController extends Controller
         $query = User::query();
 
         $userRole = $request['role'];
+        $first_name = $request['first_name'];
+        $last_name = $request['last_name'];
+        $national_code = $request['national_code'];
 
         if ($userRole) {
             $query->where('role', $userRole);
@@ -29,6 +32,18 @@ class UserController extends Controller
 
         $query->when($userRole == 'help_seeker', function ($q) {
             $q->with(['helpSeeker.aidAllocations.peopleAid']);
+        });
+
+        $query->when($first_name, function ($q) use ($first_name) {
+            $q->where('first_name', 'like', '%' . $first_name. '%');
+        });
+
+        $query->when($last_name, function ($q) use ($last_name) {
+            $q->where('last_name', 'like', '%' . $last_name. '%');
+        });
+
+        $query->when($national_code, function ($q) use ($national_code) {
+            $q->where('national_code', 'like', '%' . $national_code. '%');
         });
     
         $users = $query->paginate(10);
