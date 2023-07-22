@@ -39,6 +39,7 @@ class PackageController extends Controller
 
             return response()->json([
                 'packages' => $query->get(),
+                'count' => $query->count()
             ]);
         } else {
             $user = Auth::user();
