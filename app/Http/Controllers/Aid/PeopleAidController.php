@@ -26,6 +26,7 @@ class PeopleAidController extends Controller
     public function index(Request $request)
     {
         if (Gate::allows('is-manager-or-agent')) {
+            $title = $request['title'];
             $startHour = $request['start_hour'];
             $endHour = $request['end_hour'];
             $startDate = $request['start_date'];
@@ -33,6 +34,10 @@ class PeopleAidController extends Controller
             $aidType = $request['type'];
 
             $query = PeopleAid::query();
+
+            if ($title) {
+                $query->where('title', 'like', '%' . $title . '%');
+            }
 
             if ($startDate && $endDate) {
                 if ($startHour && $endHour) {
