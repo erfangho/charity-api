@@ -98,11 +98,11 @@ class AuthController extends Controller
             } else {
                 return response()->json([], 403);
             }
-        } else if ($role == 'help-seeker' and $request['role'] == 'help-seeker') {
+        } else if ($role == 'help-seeker' and $request['role'] == 'help_seeker') {
             if (Auth::user()->role == 'agent') {
                 $newUser = $this->registerUser($request);
 
-                $newHelper = HelpSeeker::create([
+                $newHelpSeeker = HelpSeeker::create([
                     'agent_id' => Auth::user()->agent->id,
                     'user_id' => $newUser['id'],
                     'rate' => $request['rate'],
@@ -110,7 +110,7 @@ class AuthController extends Controller
 
                 $newUserData = [
                     'user' => $newUser,
-                    'agent' => $newHelper,
+                    'help_seeker' => $newHelpSeeker,
                 ];
 
             } else {
