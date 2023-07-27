@@ -45,7 +45,9 @@ class UserController extends Controller
         $query->when($national_code, function ($q) use ($national_code) {
             $q->where('national_code', 'like', '%' . $national_code. '%');
         });
-    
+        
+        $totalCountQuery = $query->count();
+
         $users = $query->paginate(10);
         
         if ($userRole == 'helper') {
@@ -108,7 +110,7 @@ class UserController extends Controller
 
         return response()->json([
             'users' => $users,
-            'count' => $users->count(),
+            'count' => $totalCountQuery,
         ]);
     }
 
