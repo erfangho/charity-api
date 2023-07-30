@@ -35,11 +35,12 @@ class PackageController extends Controller
 
             $query->withCount('packageItems');
 
+            $queryCount = $query->count();
             $query->paginate(10);
 
             return response()->json([
                 'packages' => $query->get(),
-                'count' => $query->count()
+                'count' => $queryCount
             ]);
         } else {
             $user = Auth::user();
