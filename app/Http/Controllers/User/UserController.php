@@ -73,7 +73,10 @@ class UserController extends Controller
                         'first_name' => $user->first_name,
                         'last_name' => $user->last_name,
                         'national_code' => $user->national_code,
+                        'email' => $user->email,
                         'phone_number' => $user->phone_number,
+                        'role' => $user->role,
+                        'address' => $user->address,
                         'total_cash' => isset($user->totalCash) ? $user->totalCash : null,
                         'total_product' => isset($user->totalProduct) ? $user->totalProduct : null,
                     ];
@@ -100,7 +103,10 @@ class UserController extends Controller
                         'first_name' => $user->first_name,
                         'last_name' => $user->last_name,
                         'national_code' => $user->national_code,
+                        'email' => $user->email,
                         'phone_number' => $user->phone_number,
+                        'role' => $user->role,
+                        'address' => $user->address,
                         'total_cash_allocated' => isset($user->totalCashAllocated) ? $user->totalCashAllocated : null,
                         'total_product_allocated' => isset($user->totalProductAllocated) ? $user->totalProductAllocated : null,
                     ];
