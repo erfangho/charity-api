@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class UserController extends Controller
 {
@@ -15,7 +16,8 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
-        $query = User::orderBy('created_at', 'desc');
+        if (Gate::allows('is-manager-or-agent')) {
+            $query = User::orderBy('created_at', 'desc');
 
         $userRole = $request['role'];
         $first_name = $request['first_name'];
@@ -49,145 +51,159 @@ class UserController extends Controller
         $totalCountQuery = $query->count();
 
         $users = $query->paginate(10);
+            if ($userRole == 'helper') {
+                $users->each(function ($user) {
+                    $totalCash = $user->helper->peopleAids->filter(function ($peopleAid) {
+                        return $peopleAid->product->type === 'cash';
+                    })->sum('quantity');
+
+                    $totalProduct = $user->helper->peopleAids->filter(function ($peopleAid) {
+                        return $peopleAid->product->type === 'product';
+                    })->sum('quantity');
         
-        if ($userRole == 'helper') {
-            $users->each(function ($user) {
-                $totalCash = $user->helper->peopleAids->filter(function ($peopleAid) {
-                    return $peopleAid->product->type === 'cash';
-                })->sum('quantity');
+                    $user->totalCash = $totalCash;
+                    $user->totalProduct = $totalProduct;
+                    unset($user->helper);
+                });
 
-                $totalProduct = $user->helper->peopleAids->filter(function ($peopleAid) {
-                    return $peopleAid->product->type === 'product';
-                })->sum('quantity');
-    
-                $user->totalCash = $totalCash;
-                $user->totalProduct = $totalProduct;
-                unset($user->helper);
-            });
+                $users = $users->map(function ($user) {
+                    return [
+                        'id' => $user->id,
+                        'username' => $user->username,
+                        'first_name' => $user->first_name,
+                        'last_name' => $user->last_name,
+                        'national_code' => $user->national_code,
+                        'phone_number' => $user->phone_number,
+                        'total_cash' => isset($user->totalCash) ? $user->totalCash : null,
+                        'total_product' => isset($user->totalProduct) ? $user->totalProduct : null,
+                    ];
+                });
+            } else if ($userRole == 'help_seeker') {
+                $users->each(function ($user) {
+                    $totalCashAllocated = $user->helpSeeker->aidAllocations->filter(function ($aidAllocations) {
+                        return $aidAllocations->peopleAid->product->type === 'cash';
+                    })->sum('quantity');
 
-            $users = $users->map(function ($user) {
-                return [
-                    'id' => $user->id,
-                    'username' => $user->username,
-                    'first_name' => $user->first_name,
-                    'last_name' => $user->last_name,
-                    'national_code' => $user->national_code,
-                    'phone_number' => $user->phone_number,
-                    'total_cash' => isset($user->totalCash) ? $user->totalCash : null,
-                    'total_product' => isset($user->totalProduct) ? $user->totalProduct : null,
-                ];
-            });
-        } else if ($userRole == 'help_seeker') {
-            $users->each(function ($user) {
-                $totalCashAllocated = $user->helpSeeker->aidAllocations->filter(function ($aidAllocations) {
-                    return $aidAllocations->peopleAid->product->type === 'cash';
-                })->sum('quantity');
+                    $totalProductAllocated = $user->helpSeeker->aidAllocations->filter(function ($aidAllocations) {
+                        return $aidAllocations->peopleAid->product->type === 'product';
+                    })->sum('quantity');
+        
+                    $user->totalCashAllocated = $totalCashAllocated;
+                    $user->totalProductAllocated = $totalProductAllocated;
+                    unset($user->helpSeekr);
+                });
 
-                $totalProductAllocated = $user->helpSeeker->aidAllocations->filter(function ($aidAllocations) {
-                    return $aidAllocations->peopleAid->product->type === 'product';
-                })->sum('quantity');
-    
-                $user->totalCashAllocated = $totalCashAllocated;
-                $user->totalProductAllocated = $totalProductAllocated;
-                unset($user->helpSeekr);
-            });
+                $users = $users->map(function ($user) {
+                    return [
+                        'id' => $user->id,
+                        'username' => $user->username,
+                        'first_name' => $user->first_name,
+                        'last_name' => $user->last_name,
+                        'national_code' => $user->national_code,
+                        'phone_number' => $user->phone_number,
+                        'total_cash_allocated' => isset($user->totalCashAllocated) ? $user->totalCashAllocated : null,
+                        'total_product_allocated' => isset($user->totalProductAllocated) ? $user->totalProductAllocated : null,
+                    ];
+                });
+            } else {
+                $users = $query->get();
+            }
 
-            $users = $users->map(function ($user) {
-                return [
-                    'id' => $user->id,
-                    'username' => $user->username,
-                    'first_name' => $user->first_name,
-                    'last_name' => $user->last_name,
-                    'national_code' => $user->national_code,
-                    'phone_number' => $user->phone_number,
-                    'total_cash_allocated' => isset($user->totalCashAllocated) ? $user->totalCashAllocated : null,
-                    'total_product_allocated' => isset($user->totalProductAllocated) ? $user->totalProductAllocated : null,
-                ];
-            });
+            return response()->json([
+                'users' => $users,
+                'count' => $totalCountQuery,
+            ]);
         } else {
-            $users = $query->get();
+            return response()->json(['message' => 'Access denied'], 403);
         }
-
-        return response()->json([
-            'users' => $users,
-            'count' => $totalCountQuery,
-        ]);
     }
 
     public function show($id)
     {
-        $user = User::find($id);
+        if (Gate::allows('is-manager-or-agent')) {
+            $user = User::find($id);
 
-        if ($user->role == 'manager') {
-            $user->manager;
-        } else if ($user->role == 'agent') {
-            $user->agent;
-        } else if ($user->role == 'helper') {
-            $user->helper;
-        } else if ($user->role == 'help_seeker') {
-            $user->helpSeeker;
-        }
+            if ($user->role == 'manager') {
+                $user->manager;
+            } else if ($user->role == 'agent') {
+                $user->agent;
+            } else if ($user->role == 'helper') {
+                $user->helper;
+            } else if ($user->role == 'help_seeker') {
+                $user->helpSeeker;
+            }
 
-        if (!$user) {
+            if (!$user) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'User not found',
+                ], 404);
+            }
+
             return response()->json([
-                'status' => 'error',
-                'message' => 'User not found',
-            ], 404);
-        }
-
-        return response()->json([
             'status' => 'success',
-            'user' => $user,
-        ]);
+                'user' => $user,
+            ]);
+        } else {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
     }
 
     public function update(Request $request, $id)
     {
-        $user = User::find($id);
-        if (!$user) {
+        if (Gate::allows('is-manager-or-agent')) {
+            $user = User::find($id);
+            if (!$user) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'User not found',
+                ], 404);
+            }
+
+            $validatedData = $request->validate([
+                'username' => 'string|unique:users,username,' . $id,
+                'first_name' => 'string',
+                'last_name' => 'string',
+                'national_code' => 'string|unique:users,national_code,' . $id,
+                'phone_number' => 'string|unique:users,phone_number,' . $id,
+                'email' => 'string|unique:users,email,' . $id,
+                'address' => 'string',
+                'password' => 'string',
+                'role' => 'string',
+            ]);
+
+            $user->update($validatedData);
+
             return response()->json([
-                'status' => 'error',
-                'message' => 'User not found',
-            ], 404);
-        }
-
-        $validatedData = $request->validate([
-            'username' => 'string|unique:users,username,' . $id,
-            'first_name' => 'string',
-            'last_name' => 'string',
-            'national_code' => 'string|unique:users,national_code,' . $id,
-            'phone_number' => 'string|unique:users,phone_number,' . $id,
-            'email' => 'string|unique:users,email,' . $id,
-            'address' => 'string',
-            'password' => 'string',
-            'role' => 'string',
-        ]);
-
-        $user->update($validatedData);
-
-        return response()->json([
             'status' => 'success',
-            'message' => 'User updated successfully',
-            'user' => $user,
-        ]);
+                'message' => 'User updated successfully',
+                'user' => $user,
+            ]);
+        } else {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
     }
 
     public function destroy($id)
     {
-        $user = User::find($id);
+        if (Gate::allows('is-manager-or-agent')) {
+            $user = User::find($id);
 
-        if (!$user) {
+            if (!$user) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'User not found',
+                ], 404);
+            }
+
+            $user->delete();
+
             return response()->json([
-                'status' => 'error',
-                'message' => 'User not found',
-            ], 404);
-        }
-
-        $user->delete();
-
-        return response()->json([
             'status' => 'success',
-            'message' => 'User deleted successfully',
-        ]);
+                'message' => 'User deleted successfully',
+            ]);
+        } else {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
     }
 }

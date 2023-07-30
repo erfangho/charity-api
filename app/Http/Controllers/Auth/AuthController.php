@@ -10,6 +10,8 @@ use App\Models\Manager;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
+
 
 class AuthController extends Controller
 {
@@ -65,7 +67,7 @@ class AuthController extends Controller
                 return response()->json([], 403);
             }
         } else if ($role == 'agent' and $request['role'] == 'agent') {
-            if (Auth::user()->role == 'manager') {
+            if (Gate::allows('is-manager-or-agent')) {
                 $newUser = $this->registerUser($request);
 
                 $newAgent = Agent::create([
@@ -82,13 +84,25 @@ class AuthController extends Controller
                 return response()->json([], 403);
             }
         } else if ($role == 'helper' and $request['role'] == 'helper') {
-            if (Auth::user()->role == 'agent') {
+            if (Gate::allows('is-manager-or-agent')) {
                 $newUser = $this->registerUser($request);
 
-                $newHelper = Helper::create([
-                    'agent_id' => Auth::user()->agent->id,
-                    'user_id' => $newUser['id'],
-                ]);
+                if (Auth::user()->role == 'manager') {
+                    $manager_id = Auth::user()->manager->id;
+
+                    $newHelper = Helper::create([
+                        'manager_id' => $manager_id,
+                        'user_id' => $newUser['id'],
+                    ]);
+                } else {
+                    $agent_id = Auth::user()->agent->id;
+
+                    $newHelper = Helper::create([
+                        'agent_id' => $agent_id,
+                        'user_id' => $newUser['id'],
+                    ]);
+                }
+
 
                 $newUserData = [
                     'user' => $newUser,

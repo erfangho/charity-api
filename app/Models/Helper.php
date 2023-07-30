@@ -17,6 +17,7 @@ class Helper extends Model
     protected $fillable = [
         'user_id',
         'agent_id',
+        'manager_id'
     ];
 
     public function user()
