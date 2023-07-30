@@ -27,7 +27,7 @@ class PackageController extends Controller
         if (Gate::allows('is-manager-or-agent')) {
             $title = $request['title'];
 
-            $query = Package::query();
+            $query = Package::orderBy('created_at', 'desc');;
 
             $query->when($title, function ($q) use ($title) {
                 $q->where('title', 'like', '%' . $title . '%');

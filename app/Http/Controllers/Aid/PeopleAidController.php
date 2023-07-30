@@ -33,7 +33,7 @@ class PeopleAidController extends Controller
             $endDate = $request['end_date'];
             $aidType = $request['type'];
 
-            $query = PeopleAid::query();
+            $query = PeopleAid::orderBy('created_at', 'desc');;
 
             if ($title) {
                 $query->where('title', 'like', '%' . $title . '%');

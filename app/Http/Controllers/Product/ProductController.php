@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class ProductController extends Controller
 {
@@ -19,11 +20,27 @@ class ProductController extends Controller
      *
      * @return JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::all();
+        if (Gate::allows('is-manager-or-agent')) {
+            $name = $request->input('name');
 
-        return response()->json($products);
+            $query = Product::orderBy('created_at', 'desc');
+
+            if ($name) {
+                $query->where('name', 'like', '%' . $name . '%');
+            }
+
+            $totalCountQuery = $query->count();
+            $query->paginate(10);
+
+            return response()->json([
+                'products' => $query->get(),
+                'count' => $totalCountQuery,
+            ]);
+        } else {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
     }
 
     /**
@@ -34,17 +51,21 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string',
-            'category_id' => 'exists:product_categories,id',
-            'type' => ['required', 'in:product,cash'],
-            'quantity' => 'required|integer',
-            'description' => 'nullable|string',
-        ]);
+        if (Gate::allows('is-manager-or-agent')) {
+            $request->validate([
+                'name' => 'required|string',
+                'category_id' => 'exists:product_categories,id',
+                'type' => ['required', 'in:product,cash'],
+                'quantity' => 'required|integer',
+                'description' => 'nullable|string',
+            ]);
 
-        $product = Product::create($request->all());
+            $product = Product::create($request->all());
 
-        return response()->json($product, 201);
+            return response()->json($product, 201);
+        } else {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
     }
 
     /**
@@ -55,9 +76,13 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        $product = Product::findOrFail($id);
+        if (Gate::allows('is-manager-or-agent')) {
+            $product = Product::findOrFail($id);
 
-        return response()->json($product);
+            return response()->json($product);
+        } else {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
     }
 
     /**
@@ -69,18 +94,22 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'name' => 'string',
-            'category_id' => 'exists:product_categories,id',
-            'type' => ['in:product,cash'],
-            'quantity' => 'integer',
-            'description' => 'nullable|string',
-        ]);
+        if (Gate::allows('is-manager-or-agent')) {
+            $request->validate([
+                'name' => 'string',
+                'category_id' => 'exists:product_categories,id',
+                'type' => ['in:product,cash'],
+                'quantity' => 'integer',
+                'description' => 'nullable|string',
+            ]);
 
-        $product = Product::findOrFail($id);
-        $product->update($request->all());
+            $product = Product::findOrFail($id);
+            $product->update($request->all());
 
-        return response()->json($product);
+            return response()->json($product);
+        } else {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
     }
 
     /**
@@ -91,9 +120,13 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        $product = Product::findOrFail($id);
-        $product->delete();
+        if (Gate::allows('is-manager-or-agent')) {
+            $product = Product::findOrFail($id);
+            $product->delete();
 
-        return response()->json(null, 204);
+            return response()->json(null, 204);
+        } else {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
     }
 }

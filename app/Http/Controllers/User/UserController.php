@@ -15,7 +15,7 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
-        $query = User::query();
+        $query = User::orderBy('created_at', 'desc');
 
         $userRole = $request['role'];
         $first_name = $request['first_name'];
