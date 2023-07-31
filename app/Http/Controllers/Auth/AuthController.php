@@ -112,7 +112,7 @@ class AuthController extends Controller
             } else {
                 return response()->json([], 403);
             }
-        } else if ($role == 'help-seeker' and $request['role'] == 'help_seeker') {
+        } else if ($role == 'help_seeker' and $request['role'] == 'help_seeker') {
             if (Auth::user()->role == 'agent') {
                 $newUser = $this->registerUser($request);
 

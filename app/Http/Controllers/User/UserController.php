@@ -36,13 +36,22 @@ class UserController extends Controller
             $q->with(['helpSeeker.aidAllocations.peopleAid']);
         });
 
-        $query->when($first_name, function ($q) use ($first_name) {
-            $q->where('first_name', 'like', '%' . $first_name. '%');
-        });
-
-        $query->when($last_name, function ($q) use ($last_name) {
-            $q->where('last_name', 'like', '%' . $last_name. '%');
-        });
+        if ($first_name == $last_name) {
+            $query->when($first_name, function ($q) use ($first_name) {
+                $q->where(function ($query) use ($first_name) {
+                    $query->where('first_name', 'like', '%' . $first_name . '%')
+                          ->orWhere('last_name', 'like', '%' . $first_name . '%');
+                });
+            });
+        } else {
+            $query->when($first_name, function ($q) use ($first_name) {
+                $q->where('first_name', 'like', '%' . $first_name. '%');
+            });
+    
+            $query->when($last_name, function ($q) use ($last_name) {
+                $q->where('last_name', 'like', '%' . $last_name. '%');
+            });
+        }
 
         $query->when($national_code, function ($q) use ($national_code) {
             $q->where('national_code', 'like', '%' . $national_code. '%');
