@@ -221,4 +221,46 @@ class UserController extends Controller
             return response()->json(['message' => 'Access denied'], 403);
         }
     }
+
+    public function destroyUsers(Request $request)
+    {
+        if (Gate::allows('is-manager-or-agent')) {
+            $userIds = $request->input('user_ids');
+
+            if (!$userIds || !is_array($userIds)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Invalid user_ids provided',
+                ], 400);
+            }
+
+            $deletedUserIds = [];
+            $notFoundUserIds = [];
+
+            foreach ($userIds as $userId) {
+                $user = User::find($userId);
+
+                if (!$user) {
+                    $notFoundUserIds[] = $userId;
+                } else {
+                    $user->delete();
+                    $deletedUserIds[] = $userId;
+                }
+            }
+
+            $response = [
+                'status' => 'success',
+                'message' => 'Users deleted successfully',
+                'deleted_user_ids' => $deletedUserIds,
+            ];
+
+            if (!empty($notFoundUserIds)) {
+                $response['not_found_user_ids'] = $notFoundUserIds;
+            }
+
+            return response()->json($response);
+        } else {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
+    }
 }

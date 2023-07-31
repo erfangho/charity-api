@@ -33,6 +33,7 @@ Route::controller(AuthController::class)->group(function () {
 });
 
 Route::prefix('users')->group(function () {
+    Route::post('delete-multi', [UserController::class, 'destroyUsers']);
     Route::get('/', [UserController::class, 'index']);
     Route::get('/{id}', [UserController::class, 'show']);
     Route::put('/{id}', [UserController::class, 'update']);
