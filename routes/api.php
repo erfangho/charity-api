@@ -48,6 +48,8 @@ Route::apiResource('products', ProductController::class);
 Route::post('products/delete-multi', [ProductController::class, 'destroyProducts']);
 
 Route::apiResource('people-aids', PeopleAidController::class);
+Route::post('people-aids/delete-multi', [PeopleAidController::class, 'destroyPeopleAids']);
+
 
 Route::apiResource('packages', PackageController::class);
 Route::post('packages/delete-multi', [PackageController::class, 'destroyPackages']);

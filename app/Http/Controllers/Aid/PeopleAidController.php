@@ -210,4 +210,46 @@ class PeopleAidController extends Controller
             return response()->json(['message' => 'Access denied'], 403);
         }
     }
+
+    public function destroyPeopleAids(Request $request)
+    {
+        if (Gate::allows('is-manager-or-agent')) {
+            $peopleAidIds = $request->input('people_aid_ids');
+
+            if (!$peopleAidIds || !is_array($peopleAidIds)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Invalid people_aid_ids provided',
+                ], 400);
+            }
+
+            $deletedPeopleAidIds = [];
+            $notFoundPeopleAidIds = [];
+
+            foreach ($peopleAidIds as $peopleAidId) {
+                $peopleAid = PeopleAid::find($peopleAidId);
+
+                if (!$peopleAid) {
+                    $notFoundPeopleAidIds[] = $peopleAidId;
+                } else {
+                    $peopleAid->delete();
+                    $deletedPeopleAidIds[] = $peopleAidId;
+                }
+            }
+
+            $response = [
+                'status' => 'success',
+                'message' => 'People Aid records deleted successfully',
+                'deleted_people_aid_ids' => $deletedPeopleAidIds,
+            ];
+
+            if (!empty($notFoundPeopleAidIds)) {
+                $response['not_found_people_aid_ids'] = $notFoundPeopleAidIds;
+            }
+
+            return response()->json($response);
+        } else {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
+    }
 }
