@@ -137,4 +137,46 @@ class PackageController extends Controller
             return response()->json(['message' => 'access denied'], 403);
         }
     }
+
+    public function destroyPackages(Request $request)
+    {
+        if (Gate::allows('is-manager-or-agent')) {
+            $packageIds = $request->input('package_ids');
+
+            if (!$packageIds || !is_array($packageIds)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Invalid package_ids provided',
+                ], 400);
+            }
+
+            $deletedPackageIds = [];
+            $notFoundPackageIds = [];
+
+            foreach ($packageIds as $packageId) {
+                $package = Package::find($packageId);
+
+                if (!$package) {
+                    $notFoundPackageIds[] = $packageId;
+                } else {
+                    $package->delete();
+                    $deletedPackageIds[] = $packageId;
+                }
+            }
+
+            $response = [
+                'status' => 'success',
+                'message' => 'Packages deleted successfully',
+                'deleted_package_ids' => $deletedPackageIds,
+            ];
+
+            if (!empty($notFoundPackageIds)) {
+                $response['not_found_package_ids'] = $notFoundPackageIds;
+            }
+
+            return response()->json($response);
+        } else {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
+    }
 }

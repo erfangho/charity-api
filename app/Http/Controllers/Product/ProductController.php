@@ -129,4 +129,46 @@ class ProductController extends Controller
             return response()->json(['message' => 'Access denied'], 403);
         }
     }
+
+    public function destroyProducts(Request $request)
+    {
+        if (Gate::allows('is-manager-or-agent')) {
+            $productIds = $request->input('product_ids');
+
+            if (!$productIds || !is_array($productIds)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Invalid product_ids provided',
+                ], 400);
+            }
+
+            $deletedProductIds = [];
+            $notFoundProductIds = [];
+
+            foreach ($productIds as $productId) {
+                $product = Product::find($productId);
+
+                if (!$product) {
+                    $notFoundProductIds[] = $productId;
+                } else {
+                    $product->delete();
+                    $deletedProductIds[] = $productId;
+                }
+            }
+
+            $response = [
+                'status' => 'success',
+                'message' => 'Products deleted successfully',
+                'deleted_product_ids' => $deletedProductIds,
+            ];
+
+            if (!empty($notFoundProductIds)) {
+                $response['not_found_product_ids'] = $notFoundProductIds;
+            }
+
+            return response()->json($response);
+        } else {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
+    }
 }

@@ -45,10 +45,13 @@ Route::apiResource('organizations', OrganizationController::class);
 Route::apiResource('product-categories', ProductCategoryController::class);
 
 Route::apiResource('products', ProductController::class);
+Route::post('products/delete-multi', [ProductController::class, 'destroyProducts']);
 
 Route::apiResource('people-aids', PeopleAidController::class);
 
 Route::apiResource('packages', PackageController::class);
+Route::post('packages/delete-multi', [PackageController::class, 'destroyPackages']);
+
 
 Route::apiResource('package-items', PackageItemController::class);
 
