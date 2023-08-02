@@ -30,6 +30,8 @@ class ProductController extends Controller
             if ($name) {
                 $query->where('name', 'like', '%' . $name . '%');
             }
+            
+            $query->with('category');
 
             $totalCountQuery = $query->count();
             $query->paginate(10);
