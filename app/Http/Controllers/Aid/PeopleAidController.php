@@ -80,6 +80,8 @@ class PeopleAidController extends Controller
                 },
             ]);
 
+            $query->with('product');
+
             $peopleAids = $query->paginate(10);
 
             $transformedAllocations = $peopleAids->map(function ($allocation) {
