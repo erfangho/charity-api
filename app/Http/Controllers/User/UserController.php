@@ -85,6 +85,7 @@ class UserController extends Controller
                         'email' => $user->email,
                         'phone_number' => $user->phone_number,
                         'role' => $user->role,
+                        'helper' => $user->helper,
                         'address' => $user->address,
                         'total_cash' => isset($user->totalCash) ? $user->totalCash : null,
                         'total_product' => isset($user->totalProduct) ? $user->totalProduct : null,
