@@ -94,6 +94,8 @@ class PackageController extends Controller
     {
         $package = Package::findOrFail($id);
 
+        $package->load('packageItems');
+
         return response()->json($package);
     }
 
