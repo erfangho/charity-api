@@ -131,17 +131,17 @@ class PackageController extends Controller
      * @param  int  $id
      * @return JsonResponse
      */
-    public function destroy($id)
-    {
-        if (Gate::allows('is-manager-or-agent')) {
-            $package = Package::findOrFail($id);
-            $package->delete();
+    // public function destroy($id)
+    // {
+    //     if (Gate::allows('is-manager-or-agent')) {
+    //         $package = Package::findOrFail($id);
+    //         $package->delete();
 
-            return response()->json(null, 204);
-        } else {
-            return response()->json(['message' => 'access denied'], 403);
-        }
-    }
+    //         return response()->json(null, 204);
+    //     } else {
+    //         return response()->json(['message' => 'access denied'], 403);
+    //     }
+    // }
 
     public function destroyPackages(Request $request)
     {
@@ -164,6 +164,15 @@ class PackageController extends Controller
                 if (!$package) {
                     $notFoundPackageIds[] = $packageId;
                 } else {
+                    // Iterate through the package items to return quantities to products
+                    foreach ($package->packageItems as $packageItem) {
+                        $product = Product::find($packageItem->product_id);
+                        if ($product) {
+                            $product->quantity += $packageItem->quantity;
+                            $product->save();
+                        }
+                    }
+
                     $package->delete();
                     $deletedPackageIds[] = $packageId;
                 }
@@ -184,6 +193,7 @@ class PackageController extends Controller
             return response()->json(['message' => 'Access denied'], 403);
         }
     }
+
 
     public function createPackageWithItems(Request $request)
     {
