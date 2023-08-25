@@ -28,4 +28,9 @@ class Agent extends Model
     {
         return $this->hasMany(AidAllocation::class, 'agent_id');
     }
+
+    public function organization()
+    {
+        return $this->belongsTo(Organization::class, 'organization_id', 'id');
+    }
 }

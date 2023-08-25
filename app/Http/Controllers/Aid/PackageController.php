@@ -71,10 +71,14 @@ class PackageController extends Controller
         if (Gate::allows('is-manager-or-agent')) {
             $request->validate([
                 'title' => 'required|string|unique:packages,title',
-                'organization_id' => 'required|exists:organizations,id',
+                'organization_id' => 'nullable',
                 'quantity' => 'required|integer',
                 'description' => 'nullable|string',
             ]);
+
+            if (!$request->has('organization_id') or auth()->user()->role != 'agent') {
+                $request->request->add(['organization_id' => auth()->user()->agent->organization->id]);
+            }
 
             $package = Package::create($request->all());
 
