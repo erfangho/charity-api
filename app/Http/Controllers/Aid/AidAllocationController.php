@@ -30,6 +30,14 @@ class AidAllocationController extends Controller
             $aidAllocations->where('status', $aidStatus);
         }
 
+        $aidAllocations->when($request['help_seeker_id'], function ($q) use ($request) {
+            $q->where('help_seeker_id', $request['help_seeker_id']);
+        })->when($request['title'], function ($q) use ($request) {
+            $q->whereHas('peopleAid', function ($subQ) use ($request) {
+                $subQ->where('title', 'like', '%' . $request['title'] . '%');
+            });
+        });
+
         $aidAllocations->with([
             'agent.user' => function ($query) {
                 $query->select('id', 'first_name', 'last_name');
@@ -51,6 +59,7 @@ class AidAllocationController extends Controller
             $aidAllocations->where('help_seeker_id', Auth::user()->helpSeeker->id);
         }
 
+        $count = $aidAllocations->count();
         $aidAllocations->paginate(10);
 
         $transformedAllocations = $aidAllocations->get()->map(function ($allocation) {
@@ -79,7 +88,7 @@ class AidAllocationController extends Controller
 
         return response()->json([
             'allocations' => $transformedAllocations,
-            'count' => $aidAllocations->count(),
+            'count' => $count,
         ]);
     }
 
