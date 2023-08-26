@@ -54,6 +54,7 @@ Route::post('people-aids/delete-multi', [PeopleAidController::class, 'destroyPeo
 Route::apiResource('packages', PackageController::class);
 Route::post('packages/delete-multi', [PackageController::class, 'destroyPackages']);
 Route::post('packages/create-package-with-items', [PackageController::class, 'createPackageWithItems']);
+Route::put('packages/{id}/update-package-with-items', [PackageController::class, 'updatePackageWithItems']);
 
 
 Route::apiResource('package-items', PackageItemController::class);

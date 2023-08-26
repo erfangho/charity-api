@@ -207,45 +207,39 @@ class PackageController extends Controller
                 'organization_id' => 'required|exists:organizations,id',
                 'quantity' => 'required|integer',
                 'description' => 'nullable|string',
-                'package_items' => 'required|array|min:1',
-                'package_items.*.product_id' => 'required|exists:products,id',
-                'package_items.*.quantity' => 'required|integer|min:1',
+                'package_items' => 'array|min:1',
+                'package_items.*.product_id' => 'exists:products,id',
+                'package_items.*.quantity' => 'integer|min:1',
             ]);
 
             try {
-                // Begin a transaction
                 DB::beginTransaction();
 
-                // Create the package
                 $package = Package::create($packageValidatedData);
 
-                // Loop through package items
-                foreach ($packageValidatedData['package_items'] as $packageItemData) {
-                    $product = Product::findOrFail($packageItemData['product_id']);
-
-                    // Check if available quantity is enough
-                    if ($product->quantity < $packageItemData['quantity']) {
-                        throw new \Exception('Insufficient quantity in stock for product ' . $product->name);
+                if (isset($packageValidatedData['package_items'])) {
+                    foreach ($packageValidatedData['package_items'] as $packageItemData) {
+                        $product = Product::findOrFail($packageItemData['product_id']);
+    
+                        if ($product->quantity < $packageItemData['quantity']) {
+                            throw new \Exception('Insufficient quantity in stock for product ' . $product->name);
+                        }
+    
+                        $product->quantity -= $packageItemData['quantity'];
+                        $product->save();
+    
+                        PackageItem::create([
+                            'package_id' => $package->id,
+                            'product_id' => $packageItemData['product_id'],
+                            'quantity' => $packageItemData['quantity'],
+                        ]);
                     }
-
-                    // Deduct quantity from product and save
-                    $product->quantity -= $packageItemData['quantity'];
-                    $product->save();
-
-                    // Create package item
-                    PackageItem::create([
-                        'package_id' => $package->id,
-                        'product_id' => $packageItemData['product_id'],
-                        'quantity' => $packageItemData['quantity'],
-                    ]);
                 }
-
-                // Commit the transaction
+                
                 DB::commit();
 
                 return response()->json(['message' => 'Package created successfully'], 201);
             } catch (\Exception $e) {
-                // Rollback the transaction in case of an exception
                 DB::rollback();
 
                 return response()->json(['message' => 'Failed to create package', 'error' => $e->getMessage()], 500);
@@ -254,4 +248,82 @@ class PackageController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
     }
+
+    public function updatePackageWithItems(Request $request, $packageId)
+    {
+        if (Gate::allows('is-manager-or-agent')) {
+            $package = Package::findOrFail($packageId);
+
+            $packageValidatedData = $request->validate([
+                'title' => 'string|unique:packages,title,' . $packageId,
+                'quantity' => 'integer',
+                'description' => 'nullable|string',
+                'package_items' => 'array|min:1',
+                'package_items.*.id' => 'nullable|exists:package_items,id,package_id,' . $packageId,
+                'package_items.*.product_id' => 'exists:products,id',
+                'package_items.*.quantity' => 'integer|min:1',
+            ]);
+
+            try {
+                // Begin a transaction
+                DB::beginTransaction();
+
+                $package->update($packageValidatedData);
+
+                $existingItemIds = $package->packageItems->pluck('id')->toArray();
+
+                foreach ($packageValidatedData['package_items'] as $packageItemData) {
+                    if (isset($packageItemData['id']) && in_array($packageItemData['id'], $existingItemIds)) {
+
+                        $packageItem = PackageItem::findOrFail($packageItemData['id']);
+                        $product = Product::findOrFail($packageItemData['product_id']);
+
+                        if ($product->quantity + $packageItem->quantity < $packageItemData['quantity']) {
+                            throw new \Exception('Insufficient quantity in stock for product ' . $product->name);
+                        }
+
+                        $product->quantity += $packageItem->quantity;
+
+                        $product->quantity -= $packageItemData['quantity'];
+                        $product->save();
+
+                        $packageItem->update([
+                            'product_id' => $packageItemData['product_id'],
+                            'quantity' => $packageItemData['quantity'],
+                        ]);
+
+                        $existingItemIds = array_diff($existingItemIds, [$packageItemData['id']]);
+                    } else {
+                        $product = Product::findOrFail($packageItemData['product_id']);
+
+                        if ($product->quantity < $packageItemData['quantity']) {
+                            throw new \Exception('Insufficient quantity in stock for product ' . $product->name);
+                        }
+
+                        $product->quantity -= $packageItemData['quantity'];
+                        $product->save();
+
+                        PackageItem::create([
+                            'package_id' => $package->id,
+                            'product_id' => $packageItemData['product_id'],
+                            'quantity' => $packageItemData['quantity'],
+                        ]);
+                    }
+                }
+
+                PackageItem::whereIn('id', $existingItemIds)->delete();
+
+                DB::commit();
+
+                return response()->json(['message' => 'Package updated successfully'], 200);
+            } catch (\Exception $e) {
+                DB::rollback();
+
+                return response()->json(['message' => 'Failed to update package', 'error' => $e->getMessage()], 500);
+            }
+        } else {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+    }
+
 }
