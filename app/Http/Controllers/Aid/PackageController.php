@@ -98,9 +98,25 @@ class PackageController extends Controller
     {
         $package = Package::findOrFail($id);
 
-        $package->load('packageItems');
+        $package->load('packageItems.product'); // Load the related product for each package item
 
-        return response()->json($package);
+        $formattedPackage = [
+            'id' => $package->id,
+            'title' => $package->title,
+            'organization_id' => $package->organization_id,
+            'quantity' => $package->quantity,
+            'description' => $package->description,
+            'created_at' => $package->created_at,
+            'updated_at' => $package->updated_at,
+            'package_items' => $package->packageItems->map(function ($item) {
+                return [
+                    'product_name' => $item->product->name,
+                    'quantity' => $item->quantity,
+                ];
+            }),
+        ];
+
+        return response()->json($formattedPackage);
     }
 
     /**
