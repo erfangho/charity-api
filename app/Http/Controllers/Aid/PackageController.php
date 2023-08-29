@@ -110,6 +110,7 @@ class PackageController extends Controller
             'updated_at' => $package->updated_at,
             'package_items' => $package->packageItems->map(function ($item) {
                 return [
+                    'id' => $item->product->id,
                     'product_name' => $item->product->name,
                     'quantity' => $item->quantity,
                 ];
