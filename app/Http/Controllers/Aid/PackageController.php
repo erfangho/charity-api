@@ -111,7 +111,7 @@ class PackageController extends Controller
             'package_items' => $package->packageItems->map(function ($item) {
                 return [
                     'id' => $item->product->id,
-                    'product_name' => $item->product->name,
+                    'product' => $item->product->name,
                     'quantity' => $item->quantity,
                 ];
             }),
