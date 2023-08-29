@@ -220,13 +220,18 @@ class PackageController extends Controller
         if (Gate::allows('is-manager-or-agent')) {
             $packageValidatedData = $request->validate([
                 'title' => 'required|string|unique:packages,title',
-                'organization_id' => 'required|exists:organizations,id',
                 'quantity' => 'required|integer',
                 'description' => 'nullable|string',
                 'package_items' => 'array|min:1',
                 'package_items.*.product_id' => 'exists:products,id',
                 'package_items.*.quantity' => 'integer|min:1',
             ]);
+
+            if ($request->has('organization_id')) {
+                $packageValidatedData['organization_id'] = $request->get('organization_id');
+            } else {
+                $packageValidatedData['organization_id'] = auth()->user()->agent->organization->id;
+            }
 
             try {
                 DB::beginTransaction();
