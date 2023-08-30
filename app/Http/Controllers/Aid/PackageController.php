@@ -98,7 +98,7 @@ class PackageController extends Controller
     {
         $package = Package::findOrFail($id);
 
-        $package->load('packageItems.product'); // Load the related product for each package item
+        $package->load('packageItems.product');
 
         $formattedPackage = [
             'id' => $package->id,
@@ -111,7 +111,7 @@ class PackageController extends Controller
             'package_items' => $package->packageItems->map(function ($item) {
                 return [
                     'id' => $item->product->id,
-                    'product' => $item->product->name,
+                    'name' => $item->product->name,
                     'quantity' => $item->quantity,
                 ];
             }),

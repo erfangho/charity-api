@@ -109,6 +109,7 @@ class UserController extends Controller
                 $users = $users->map(function ($user) {
                     return [
                         'id' => $user->id,
+                        'help_seeker_id' => $user->helpSeeker->id,
                         'username' => $user->username,
                         'first_name' => $user->first_name,
                         'last_name' => $user->last_name,

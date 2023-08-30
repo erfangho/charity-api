@@ -102,7 +102,7 @@ class AidAllocationController extends Controller
     {
         if (Gate::allows('is-manager-or-agent')) {
             $validatedData = $request->validate([
-                'agent_id' => 'required|exists:agents,id',
+                'agent_id' => 'exists:agents,id',
                 'status' => ['in:assigned,not_assigned'],
                 'quantity' => 'required|integer',
                 'help_seeker_id' => 'required|exists:help_seekers,id',
@@ -111,6 +111,10 @@ class AidAllocationController extends Controller
 
             if (empty($validatedData['status'])) {
                 $validatedData['status'] = 'not_assigned';
+            }
+
+            if (empty($validatedData['agent_id'])) {
+                $validatedData['agent_id'] = auth()->user()->agent->id;
             }
 
             $peopleAid = PeopleAid::where('id', $validatedData['people_aid_id'])->first();
