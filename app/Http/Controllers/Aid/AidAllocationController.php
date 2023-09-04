@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Aid;
 use App\Http\Controllers\Controller;
 use App\Models\AidAllocation;
 use App\Models\PeopleAid;
+use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -176,16 +177,71 @@ class AidAllocationController extends Controller
         }
     }
 
-    public function destroy($id)
+    // public function destroy($id)
+    // {
+    //     if (Gate::allows('is-manager-or-agent')) {
+    //         $aidAllocation = AidAllocation::findOrFail($id);
+
+    //         $aidAllocation->delete();
+
+    //         return response()->json(null, 204);
+    //     } else {
+    //         return response()->json(['message' => 'access denied'], 403);
+    //     }
+    // }
+
+    public function destroyAidAllocations(Request $request)
     {
         if (Gate::allows('is-manager-or-agent')) {
-            $aidAllocation = AidAllocation::findOrFail($id);
+            $allocationIds = $request->input('aid_allocation_ids');
 
-            $aidAllocation->delete();
+            if (!$allocationIds || !is_array($allocationIds)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Invalid allocation_ids provided',
+                ], 400);
+            }
 
-            return response()->json(null, 204);
+            $deletedAllocationIds = [];
+            $notFoundAllocationIds = [];
+
+            foreach ($allocationIds as $allocationId) {
+                $allocation = AidAllocation::find($allocationId);
+
+                if (!$allocation) {
+                    $notFoundAllocationIds[] = $allocationId;
+                } else {
+                    // Get the PeopleAid associated with the allocation
+                    $peopleAid = PeopleAid::find($allocation->people_aid_id);
+
+                    if ($peopleAid) {
+                        // Return quantities to products
+                        $product = Product::find($peopleAid->product_id);
+                        
+                        if ($product) {
+                            $product->quantity += $allocation->quantity * $peopleAid->quantity;
+                            $product->save();
+                        }
+                    }
+
+                    $allocation->delete();
+                    $deletedAllocationIds[] = $allocationId;
+                }
+            }
+
+            $response = [
+                'status' => 'success',
+                'message' => 'Aid allocations deleted successfully',
+                'deleted_allocation_ids' => $deletedAllocationIds,
+            ];
+
+            if (!empty($notFoundAllocationIds)) {
+                $response['not_found_allocation_ids'] = $notFoundAllocationIds;
+            }
+
+            return response()->json($response);
         } else {
-            return response()->json(['message' => 'access denied'], 403);
+            return response()->json(['message' => 'Access denied'], 403);
         }
     }
 }

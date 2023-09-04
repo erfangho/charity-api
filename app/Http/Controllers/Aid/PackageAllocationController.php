@@ -141,16 +141,72 @@ class PackageAllocationController extends Controller
         }
     }
 
-    public function destroy($id): JsonResponse
+    // public function destroy($id): JsonResponse
+    // {
+    //     if (Gate::allows('is-manager-or-agent')) {
+    //         $packageAllocation = PackageAllocation::findOrFail($id);
+
+    //         $packageAllocation->delete();
+
+    //         return response()->json(null, 204);
+    //     } else {
+    //         return response()->json(['message' => 'Access denied.'], 403);
+    //     }
+    // }
+
+    public function destroyPackageAllocations(Request $request)
     {
         if (Gate::allows('is-manager-or-agent')) {
-            $packageAllocation = PackageAllocation::findOrFail($id);
-
-            $packageAllocation->delete();
-
-            return response()->json(null, 204);
+            $allocationIds = $request->input('package_allocation_ids');
+    
+            if (!$allocationIds || !is_array($allocationIds)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Invalid allocation_ids provided',
+                ], 400);
+            }
+    
+            $deletedAllocationIds = [];
+            $notFoundAllocationIds = [];
+    
+            foreach ($allocationIds as $allocationId) {
+                $allocation = PackageAllocation::find($allocationId);
+    
+                if (!$allocation) {
+                    $notFoundAllocationIds[] = $allocationId;
+                } else {
+                    // Get the associated package and its items
+                    $package = $allocation->package;
+                    $packageItems = $package->items;
+    
+                    // Return quantities to products for each package item
+                    foreach ($packageItems as $packageItem) {
+                        $product = $packageItem->product;
+    
+                        if ($product) {
+                            $product->quantity += $packageItem->quantity * $allocation->quantity;
+                            $product->save();
+                        }
+                    }
+    
+                    $allocation->delete();
+                    $deletedAllocationIds[] = $allocationId;
+                }
+            }
+    
+            $response = [
+                'status' => 'success',
+                'message' => 'Package allocations deleted successfully',
+                'deleted_allocation_ids' => $deletedAllocationIds,
+            ];
+    
+            if (!empty($notFoundAllocationIds)) {
+                $response['not_found_allocation_ids'] = $notFoundAllocationIds;
+            }
+    
+            return response()->json($response);
         } else {
-            return response()->json(['message' => 'Access denied.'], 403);
+            return response()->json(['message' => 'Access denied'], 403);
         }
-    }
+    }   
 }

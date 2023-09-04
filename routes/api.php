@@ -60,5 +60,8 @@ Route::put('packages/{id}/update-package-with-items', [PackageController::class,
 Route::apiResource('package-items', PackageItemController::class);
 
 Route::apiResource('aid-allocations', AidAllocationController::class);
+Route::post('aid-allocations/delete-multi', [AidAllocationController::class, 'destroyAidAllocations']);
 
 Route::apiResource('package-allocations', PackageAllocationController::class);
+Route::post('package-allocations/delete-multi', [PackageAllocationController::class, 'destroyPackageAllocations']);
+
