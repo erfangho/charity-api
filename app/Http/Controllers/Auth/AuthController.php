@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Hash;
 
 
 class AuthController extends Controller
@@ -218,5 +219,27 @@ class AuthController extends Controller
             'status' => 'success',
             'user' => $user,
         ]);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $user = Auth::user();
+
+        $confirmCurrentPassword = Hash::check($request['current_password'], $user->password);
+
+        if (!$confirmCurrentPassword) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Current password is incorrect',
+            ], 422);
+        } else {
+            $user->password = Hash::make($request['new_password']);
+            $user->save();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Password changed successfully',
+            ]);
+        }
     }
 }
