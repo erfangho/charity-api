@@ -26,6 +26,12 @@ class PackageAllocationController extends Controller
             $packageAllocations->where('status', $status);
         }
 
+        $packageAllocations->when($request['title'], function ($q) use ($request) {
+            $q->whereHas('package', function ($subQ) use ($request) {
+                $subQ->where('title', 'like', '%' . $request['title'] . '%');
+            });
+        });
+
         $packageAllocations->with([
             'agent.user' => function ($query) {
                 $query->select('id', 'first_name', 'last_name');
