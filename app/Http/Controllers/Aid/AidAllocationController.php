@@ -244,4 +244,47 @@ class AidAllocationController extends Controller
             return response()->json(['message' => 'Access denied'], 403);
         }
     }
+
+    public function multiAssign(Request $request)
+    {
+        if (Gate::allows('is-manager-or-agent')) {
+            $allocationIds = $request->input('aid_allocation_ids');
+
+            if (!$allocationIds || !is_array($allocationIds)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Invalid allocation_ids provided',
+                ], 400);
+            }
+
+            $assignedAllocationIds = [];
+            $notFoundAllocationIds = [];
+
+            foreach ($allocationIds as $allocationId) {
+                $allocation = AidAllocation::find($allocationId);
+
+                if (!$allocation) {
+                    $notFoundAllocationIds[] = $allocationId;
+                } else {
+                    $assignedAllocationIds[] = $allocationId;
+
+                    $allocation->status = 'assigned';
+                    $allocation->save();
+                }
+            }
+            $response = [
+                'status' => 'success',
+                'message' => 'Aid allocations assigned successfully',
+                'assigned_allocation_ids' => $assignedAllocationIds,
+            ];
+
+            if (!empty($notFoundAllocationIds)) {
+                $response['not_found_allocation_ids'] = $notFoundAllocationIds;
+            }
+
+            return response()->json($response);
+        } else {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
+    }
 }

@@ -62,7 +62,8 @@ Route::apiResource('package-items', PackageItemController::class);
 
 Route::apiResource('aid-allocations', AidAllocationController::class);
 Route::post('aid-allocations/delete-multi', [AidAllocationController::class, 'destroyAidAllocations']);
+Route::post('aid-allocations/assign-multi', [AidAllocationController::class, 'multiAssign']);
+
 
 Route::apiResource('package-allocations', PackageAllocationController::class);
 Route::post('package-allocations/delete-multi', [PackageAllocationController::class, 'destroyPackageAllocations']);
-
