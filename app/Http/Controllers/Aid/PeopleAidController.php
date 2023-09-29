@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Aid;
 
 use App\Http\Controllers\Controller;
+use App\Models\AidAllocation;
 use App\Models\PeopleAid;
 use App\Models\Product;
 use Carbon\Carbon;
@@ -250,6 +251,21 @@ class PeopleAidController extends Controller
             }
 
             return response()->json($response);
+        } else {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
+    }
+
+    public function abundanceChart()
+    {
+        if (Gate::allows('is-manager-or-agent')) {
+            $peopleAidData = PeopleAid::getMonthlyCountsLastYear();
+            $aidAllocationData = AidAllocation::getMonthlyCountsLastYear();
+
+            return response()->json([
+                'people_aid_data' => $peopleAidData,
+                'aid_allocation_data' => $aidAllocationData
+            ]);
         } else {
             return response()->json(['message' => 'Access denied'], 403);
         }
