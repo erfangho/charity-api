@@ -287,4 +287,18 @@ class AidAllocationController extends Controller
             return response()->json(['message' => 'Access denied'], 403);
         }
     }
+
+    public function chartData()
+    {
+        if (Gate::allows('is-manager-or-agent')) {
+            $peopleAidsCount = PeopleAid::all()->count();
+
+            $assignedAidAllocationCount = AidAllocation::where('status', 'assigned')->count();
+            $notAssignedAidAllocationCount = AidAllocation::where('status', 'not_assigned')->count();
+
+            return response()->json(["data" => [$peopleAidsCount, $assignedAidAllocationCount, $notAssignedAidAllocationCount]]);
+        } else {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
+    }
 }
