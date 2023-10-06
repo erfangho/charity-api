@@ -270,4 +270,45 @@ class PeopleAidController extends Controller
             return response()->json(['message' => 'Access denied'], 403);
         }
     }
+
+    public function getHelperAidHistory(Request $request)
+    {
+        if (Gate::allows('is-manager-or-agent')) {
+            if ($request->has('helper_id')) {
+                $validatedRequest = $request->validate([
+                    'helper_id' => 'required|exists:helpers,id',
+                ]);
+    
+                $peopleAids = PeopleAid::where('helper_id', $validatedRequest['helper_id'])->get();
+
+                $helperAids = $peopleAids->map(function ($peopleAid) {
+                    return [
+                        'title' => $peopleAid->title,
+                        'quantity' => $peopleAid->quantity,
+                        'created_at' => $peopleAid->created_at,
+                    ];
+                });
+
+                return response()->json($helperAids);
+            } else if ($request->has('help_seeker_id')) {
+                $validatedRequest = $request->validate([
+                    'help_seeker_id' => 'required|exists:help_seekers,id',
+                ]);
+
+                $aidAllocations = AidAllocation::where('help_seeker_id', $validatedRequest['help_seeker_id'])->get();
+
+                $helpSeekerAids = $aidAllocations->map(function ($aidAllocation) {
+                    return [
+                        'title' => $aidAllocation->peopleAid->title,
+                        'quantity' => $aidAllocation->quantity,
+                        'created_at' => $aidAllocation->created_at,
+                    ];
+                });
+
+                return response()->json($helpSeekerAids);
+            }
+        } else {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
+    }
 }

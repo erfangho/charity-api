@@ -51,6 +51,7 @@ Route::post('products/delete-multi', [ProductController::class, 'destroyProducts
 Route::apiResource('people-aids', PeopleAidController::class);
 Route::post('people-aids/delete-multi', [PeopleAidController::class, 'destroyPeopleAids']);
 Route::get('people-aids/abundance-chart/data', [PeopleAidController::class, 'abundanceChart']);
+Route::post('aids/history', [PeopleAidController::class, 'getHelperAidHistory']);
 
 Route::apiResource('packages', PackageController::class);
 Route::post('packages/delete-multi', [PackageController::class, 'destroyPackages']);
